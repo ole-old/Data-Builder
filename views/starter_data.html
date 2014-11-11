@@ -1,0 +1,69 @@
+<html>
+<head>
+	<title>Installer Data Generator</title>
+	<link rel="stylesheet" href="css/style.css">
+	<script src="jquery-1.7.2.js"></script>
+	<script src="socket.io-1.1.0.js"></script>
+	<script src="jquery.paginate.js"></script>
+	<script src="jquery.twbsPagination.js"></script>
+    <script src="spin.js"></script>
+    <script src="jquery.spin.js"></script>
+<body>
+	Identify a BeLL Server :  <input type=text id="txtboxCouchServerSrc" name="txtboxCouchServerSrc"  style="width: 35%; padding: 2px"/>
+	<select id="selectCouchSource" name="selectCouchSource">
+		<%  var sourceCouchOptions = ['Options', 'http://openbell.ole.org:5984', 'http://olesomalia:oleoleole@olesomalia.cloudant.com', 'http://127.0.0.1:5984']
+		    for(var i = 0; i < sourceCouchOptions.length; i++) { %>
+            <option value="<%= sourceCouchOptions[i]%>"><%= sourceCouchOptions[i]%></option>
+	    <% } %>
+	</select>
+	<input type="button" id="submitSourceCouchAddr" name="submitSourceCouchAddr" onclick="viewDataFromSelBeLL()" value="View Data from Chosen BeLL">
+	<!--<div id="dataSelectionPanel" name="dataSelectionPanel">-->
+    <table id="selectionPanelsTable">
+        <tr>
+            <td>
+                <div id="coursesPanel" name="coursesPanel">
+                    <h3 id="selectCoursesHead"></h3>
+                    <div id="selectCourses" name="selectCourses" style="overflow-y: auto; overflow-x: auto; height: 250px;"></div>
+                </div>
+            </td>
+            <td>
+                <div id="resourcesPanel" name="resourcesPanel">
+                    <h3 id="selectResourcesHead"></h3>
+                    <div id="selectResources" name="selectResources" style="overflow-y: auto; overflow-x: auto; height: 250px;"></div>
+                    <div id="paginator"></div>
+                </div>
+            </td>
+        </tr>
+        <br><br>
+        <div id="popup-spinning" name="popup-spinning"></div>
+        <!--add another row in table which will prvide collection selection interface-->
+        <tr>
+            <td>
+                <div id="collectionsPanel" name="collectionsPanel">
+                    <h3 id="selectCollectionsHead"></h3>
+                    <div id="selectCollections" name="selectCollections" style="overflow-y: auto; overflow-x: auto; height: 250px;"></div>
+                    <div id="paginatorCollections"></div>
+                </div>
+            </td>
+            <td>
+                <div id="collectionMemberResourcesPanel" name="collectionMemberResourcesPanel">
+                    <h3 id="selectCollectionMemberResourcesHead"></h3>
+                    <div id="contentsOfCollection" name="contentsOfCollection"></div>
+                    <div id="selectCollectionMemberResources" name="selectCollectionMemberResources" style="overflow-y: auto; overflow-x: auto; height: 250px;"></div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <div id="submitPanel" name="submitPanel"></div>
+            </td>
+        </tr>
+    </table>
+
+    
+	<!--<input type="button" id="hmm" name="hmm" onclick="testing()" value="Delete and Copy Db files to dest folder">-->
+	<div id="socketRespFromServer"></div>
+    <!--</div>-->
+    <script src="script_starter_data.js"></script>
+</body>
+</html>
