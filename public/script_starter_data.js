@@ -12,6 +12,7 @@ $(document).ready(function() {
 
 function startActivityIndicator(jQueryPanelId) {
     $(jQueryPanelId).spin();
+
 }
 
 function stopActivityIndicator(jQueryPanelId) {
@@ -91,9 +92,9 @@ function showTheseCollectionsOnTheSelectCollectionsPanel(majorCollectionsFetched
     collectionsList.name = "majorCollectionsList";
     collectionsList.id = "majorCollectionsList";
     majorCollectionsFetched.sort(function(obj1, obj2) {
-	// ascending on the values of field 'name' (of type string)
-	return obj2.name < obj1.name;
-});
+		// ascending on the values of field 'name' (of type string)
+		return obj2.name < obj1.name;
+	});
     for(var i = 0; i < majorCollectionsFetched.length; i++) {
         var collectionInfo = majorCollectionsFetched[i];
         var listItem = document.createElement('li');
@@ -140,14 +141,16 @@ function showTheseResourcesOnThisPanel(resourcesFetched, panelName) {
 		var br = document.createElement('br');
 		checkbox.onclick = function() {
 			if($(this).is(':checked')) { // the click resulted in checking/ticking the checkbox
-				// alert("checked: " + $(this).val());
 				// add id of this resource to the selectedResourceIdsFinal array
 				var resourceId = $(this).val();
+				$("#selectResources").find("#" + resourceId).prop('checked', true);
+				$("#collectionMemberResourcesPanel").find("#" + resourceId).prop('checked', true);
 				selectedResourceIdsFinal.push(resourceId);
 			} else { // the click resulted in unchecking the checkbox
-				// alert("UNchecked: " + $(this).val());
 				// remove id of this resource from the selectedResourceIdsFinal array
 				var resourceId = $(this).val();
+				$("#collectionMemberResourcesPanel").find("#" + resourceId).prop('checked', false);
+				$("#selectResources").find("#" + resourceId).prop('checked', false);
 				var position = selectedResourceIdsFinal.indexOf(resourceId);
 				if (position > -1) {
 					selectedResourceIdsFinal.splice(position, 1);
@@ -237,10 +240,13 @@ socket.on('resourcesDataForChosenCollection', function(collectionData) {
 					var resourceId;
 					for (var i = collectionData.data.length - 1; i >= 0; i--) {
 						resourceId = collectionData.data[i].id;
-						$("#selectResources").find("#" + resourceId).remove();
-						$("#selectResources").find("#label" + resourceId).remove();
-						$("#" + resourceId).prop('checked', true);
-						selectedResourceIdsFinal.push(resourceId);
+						// $("#" + resourceId).prop('checked', true);
+						if(selectedResourceIdsFinal.indexOf(resourceId) == -1) {// if resource is already NOT in the 'selectedResourceIdsFinal' array 
+							// then put it in
+							selectedResourceIdsFinal.push(resourceId);
+						}	
+						$("#selectResources").find("#" + resourceId).prop('checked', true);
+						$("#collectionMemberResourcesPanel").find("#" + resourceId).prop('checked', true);											
 					};
 				} else { // the click resulted in unchecking this checkbox
 					// alert("UNchecked: " + $(this).val());
@@ -249,6 +255,9 @@ socket.on('resourcesDataForChosenCollection', function(collectionData) {
 					for (var i = collectionData.data.length - 1; i >= 0; i--) {
 						resourceId = collectionData.data[i].id;
 						$("#" + resourceId).prop('checked', false);
+						// uncheck this resource in the 'all resources panel' if it is among those currently opened in that panel
+						$("#selectResources").find("#" + resourceId).prop('checked', false);
+						$("#collectionMemberResourcesPanel").find("#" + resourceId).prop('checked', false);
 						position = selectedResourceIdsFinal.indexOf(resourceId);
 						if (position > -1) {
 							selectedResourceIdsFinal.splice(position, 1);
