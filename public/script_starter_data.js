@@ -1,4 +1,4 @@
-var selectedResourceIdsFinal = [];
+var selectedResourceIdsFinal = [], selectedCourseIdsFinal = [];
 var wheel = null;
 $(document).ready(function() {
 	$('input[name="submitButton"]').removeAttr('disabled');
@@ -8,6 +8,7 @@ $(document).ready(function() {
 	// reset textbox holding selected source couch server's address
 	$("#txtboxCouchServerSrc").val("");
 	selectedResourceIdsFinal = []; // reinitialise array on window reload/refresh
+    selectedCourseIdsFinal = [];
 });
 
 function startActivityIndicator(jQueryPanelId) {
@@ -24,20 +25,26 @@ function addMessage(msg) {
 	$("#socketRespFromServer").html('<div class="message">' + msg + '</div>');
 }
 
+function uncheckAllCheckBoxes() {
+    $('input:checkbox').removeAttr('checked');
+}
+
 socket.on('statusOnStarterDataPrep', function(statusMsg) {	
 	if (statusMsg.err) {
-		alert("Failed to prepare data out of chosen items. Plz try again");
+		alert("Failed to prepare data out of chosen items.\n Error: " + statusMsg.err.error + "\n Plz try again");
+        uncheckAllCheckBoxes();
 	} else {
 		// enable button and show status of starter-data-prep task
 		alert("Successfully prepared data out of chosen items. \nPlease pick all contents inside the folder 'StarterDataLocation' of " + 
 			"the Startup-Data-Builder and \nplace (choosing overwrite option if prompted) them inside the " + 
-			"folder 'Starter_Data' of the Startup-Installation tool");			
+			"folder 'Starter_Data' of the Startup-Installation tool");
 	}
 	var activityIndicatorPanelJqueryId = "#popup-spinning";
 	stopActivityIndicator(activityIndicatorPanelJqueryId);
 	$('input[name="submitButton"]').removeAttr('disabled');
-	$('input[name="submitSourceCouchAddr"]').removeAttr('disabled');	
+	$('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
 	selectedResourceIdsFinal = [];
+    selectedCourseIdsFinal = [];
 });	
 
 socket.on('resourcesDataForSelectedPage', function(resourcesForThePage) {
@@ -51,7 +58,50 @@ socket.on('resourcesDataForSelectedPage', function(resourcesForThePage) {
 	stopActivityIndicator(activityIndicatorPanelJqueryId);
 });
 
-function showTheseCoursesOnTheSelectCoursesPanel(coursesFetched) {
+function showAllCoursesAsChecked(coursesFetched) {
+    // check all courses selectedCourseIdsFinal
+    var courseId;
+    for (var i = coursesFetched.length - 1; i >= 0; i--) {
+        courseId = coursesFetched[i].id;
+        // $("#" + resourceId).prop('checked', true);
+        if(selectedCourseIdsFinal.indexOf(courseId) == -1) {// if course is already NOT in the 'selectedCourseIdsFinal' array
+            // then put it in
+            selectedCourseIdsFinal.push(courseId);
+        }
+        $("#selectCourses").find("#" + courseId).prop('checked', true);
+    }
+}
+
+function showAllCoursesAsUnChecked(coursesFetched) {
+    var courseId, position;
+    for (var i = coursesFetched.length - 1; i >= 0; i--) {
+        courseId = coursesFetched[i].id;
+        // uncheck this course in the 'selectCourses' panel if it is among those currently opened in that panel
+        position = selectedCourseIdsFinal.indexOf(courseId);
+        if (position > -1) {
+            selectedCourseIdsFinal.splice(position, 1);
+        }
+        $("#selectCourses").find("#" + courseId).prop('checked', false);
+    }
+}
+
+function populateSelectCoursesViewPanel(coursesFetched) {
+    // add select all checkbox to the select-courses panel
+    var selAllCheckbox = document.createElement('input');
+    selAllCheckbox.type = "checkbox";    selAllCheckbox.name = "checkAllCourses";    selAllCheckbox.id = "checkAllCourses";
+    selAllCheckbox.value = "allCoursesSelected";
+    var label = document.createElement('label');    label.htmlFor = "checkAllCourses";    label.style.fontWeight = 'bold';
+    label.appendChild(document.createTextNode("Select all"));
+    var br = document.createElement('br');
+    selAllCheckbox.onclick = function() {
+        if ($(this).is(':checked')) { // the click resulted in checking/ticking the checkbox
+            // mark all courses checkboxes as checked
+            showAllCoursesAsChecked(coursesFetched);
+        } else {
+            showAllCoursesAsUnChecked(coursesFetched);
+        }
+    };
+    $("#divSelectAllCourses").append(selAllCheckbox); $("#divSelectAllCourses").append(label); $("#divSelectAllCourses").append(br);
 	$("#selectCourses").html('');
 	for(var i = 0; i < coursesFetched.length; i++) { 
     	var courseInfo = coursesFetched[i];
@@ -65,6 +115,23 @@ function showTheseCoursesOnTheSelectCoursesPanel(coursesFetched) {
 		label.appendChild(document.createTextNode(courseInfo.name));
 		var br = document.createElement('br');
 		$("#selectCourses").append(checkbox); $("#selectCourses").append(label); $("#selectCourses").append(br);
+        checkbox.onclick = function() {
+            var courseId = $(this).val();
+            var position = selectedCourseIdsFinal.indexOf(courseId);
+            if($(this).is(':checked')) { // the click resulted in checking/ticking the checkbox
+                // add id of this course to the selectedCourseIdsFinal array if it is already NOT in the array
+                if (position == -1) {
+                    selectedCourseIdsFinal.push(courseId);
+                }
+                $("#selectCourses").find("#" + courseId).prop('checked', true);
+            } else { // the click resulted in unchecking the checkbox
+                // remove id of this course from the selectedCourseIdsFinal array
+                if (position > -1) {
+                    selectedCourseIdsFinal.splice(position, 1);
+                }
+                $("#selectCourses").find("#" + courseId).prop('checked', false);
+            }
+        }
  	}
 }
 
@@ -162,6 +229,7 @@ function showTheseResourcesOnThisPanel(resourcesFetched, panelName) {
 }
 
 socket.on('dataFromChosenBeLLCouch', function(data) {
+	selectedResourceIdsFinal = [], selectedCourseIdsFinal = [];
 	$('input[name="submitButton"]').removeAttr('disabled');
 	$('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
 	var activityIndicatorPanelJqueryId = "#popup-spinning";
@@ -171,12 +239,13 @@ socket.on('dataFromChosenBeLLCouch', function(data) {
 	} else {
 		// remove submit button so that it does not get added twice
 		$("#submitButton").remove();
-		$("#selectCoursesHead").text("All Courses");	
+		$("#selectCoursesHead").text("All Courses");
+
 		$("#selectResourcesHead").text("All Resources");	
 		$("#selectCollectionsHead").text("All Collections");
 		$("#selectCollectionMemberResourcesHead").text("Contents Of Chosen Collection");	
 		// append courses to courses panel/div #selectCourses
-		showTheseCoursesOnTheSelectCoursesPanel(data.arrCourses);
+        populateSelectCoursesViewPanel(data.arrCourses);
 	 	// append resources to resources panel/div #selectCourses
 	 	var selectFromAllResourcesPanelId = "selectResources";
 	 	showTheseResourcesOnThisPanel(data.arrResources, selectFromAllResourcesPanelId);
@@ -267,7 +336,9 @@ socket.on('resourcesDataForChosenCollection', function(collectionData) {
 			}
 			$("#contentsOfCollection").html(''); $("#contentsOfCollection").append(checkbox); $("#contentsOfCollection").append(label);
 			$("#contentsOfCollection").append(br);
-		}
+		} else {
+            $("#contentsOfCollection").html('');
+        }
 		var panelToShowFetchedResourcesOn = "selectCollectionMemberResources";
 		showTheseResourcesOnThisPanel(collectionData.data, panelToShowFetchedResourcesOn);
 	}
@@ -281,17 +352,20 @@ function prepareStarterData(event) {
 	$('input[name="submitButton"]').attr('disabled','disabled');
 	$('input[name="submitSourceCouchAddr"]').attr('disabled','disabled');
 	$("#socketRespFromServer").html('');
-	var ids = [], resourceIds = [];
-	$('#selectCourses input:checked').each(function() {
-	    ids.push($(this).val());
-	});
+//	var ids = [], resourceIds = [];
+//	$('#selectCourses input:checked').each(function() {
+//	    ids.push($(this).val());
+//	});
 	// $('#selectResources input:checked').each(function() {
 	//     resourceIds.push($(this).val());
 	// });
-	if ( (ids.length === 0) && (selectedResourceIdsFinal.length === 0) ) {
+	if ( (selectedCourseIdsFinal.length === 0) && (selectedResourceIdsFinal.length === 0) ) {
 		alert("You did not choose any items");
+        stopActivityIndicator(activityIndicatorPanelJqueryId);
+        $('input[name="submitButton"]').removeAttr('disabled');
+        $('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
 	} else {		
-		var selectedCoursesAndResources = {courseIds: ids, resourceIds: selectedResourceIdsFinal};
+		var selectedCoursesAndResources = {courseIds: selectedCourseIdsFinal, resourceIds: selectedResourceIdsFinal};
 		socket.emit('includeCoursesInStarterData', selectedCoursesAndResources);
 	}
 }

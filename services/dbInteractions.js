@@ -405,7 +405,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
       });
   };
 
-  functions.fetchResourcesPointingToThisCollection = function(collectionId, callback) {
+  functions.fetchResourcesPointingToThisCollection = function(collectionId, collectionName, callback) {
     var resourcesDb = sourceCouchDb.db.use('resources');
     var resourcesViewkeys = [collectionId];
     resourcesDb.view('bell', 'listCollection',{keys: resourcesViewkeys, include_docs: true}, function(err, resp) {
@@ -415,7 +415,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
       } else {
         var arrResources = [];
         var resourceIdAndTitle;
-        console.log("fetched resources-for-collection-" + collectionId + " count: " + resp.rows.length);
+        console.log("fetched resources count for collection: " + collectionName + "(" + collectionId + "): " + resp.rows.length);
         resp.rows.forEach( function(resourceDocContainer) {
           resourceIdAndTitle = {id: resourceDocContainer.doc._id, name: resourceDocContainer.doc.title};
           arrResources.push(resourceIdAndTitle);

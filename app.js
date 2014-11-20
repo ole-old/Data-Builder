@@ -74,7 +74,7 @@ io.sockets.on('connection', function (socketInst) {
 	socketInst.on('fetchResourcesForThisCollection', function(collectionId, collectionName) {
 		waterfall([
 			function(callback){
-				dao.fetchResourcesPointingToThisCollection(collectionId, callback);
+				dao.fetchResourcesPointingToThisCollection(collectionId, collectionName, callback);
 			}
 		], function (err, result) {
 			var dataForChosenCollection = {err: null, data: null, collectionName: collectionName};
