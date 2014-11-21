@@ -5,14 +5,11 @@ var bodyParser = require('body-parser');
 var waterfall = require('async-waterfall');
 var async = require('async');
 var socket = require('socket.io');
-var counter = 0;
 var socketEmitter;
 
 var sourceCouchServer = 'http://127.0.0.1:5984';//'http://openbell.ole.org:5984';
 var localCouchServer = 'http://127.0.0.1:5984';
 var dao = require('./services/dbInteractions')(localCouchServer, sourceCouchServer);
-
-// var replicator = require('./replicator.js');
 
 // configuring express to use html as the view engine, its default view engine is jade (courtesy saurabh sharma: 
 // http://www.makebetterthings.com/node-js/how-to-use-html-with-express-node-js. btw, what is ejs??
