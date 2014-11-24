@@ -7,7 +7,7 @@
 }
 .jPaginate a{
     line-height:15px;
-    height:18px;
+    height:auto;
     cursor:pointer;
     padding:2px 5px;
     margin:2px;
