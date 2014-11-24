@@ -1,13 +1,13 @@
 var selectedResourceIdsFinal = [], selectedCourseIdsFinal = [];
 var wheel = null;
 $(document).ready(function() {
-	$('input[name="submitButton"]').removeAttr('disabled');
-	$('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
-	// reset select source couch server dropdown
-	$("#selectCouchSource").val("");
-	// reset textbox holding selected source couch server's address
-	$("#txtboxCouchServerSrc").val("");
-	selectedResourceIdsFinal = []; // reinitialise array on window reload/refresh
+    $('input[name="submitButton"]').removeAttr('disabled');
+    $('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
+    // reset select source couch server dropdown
+    $("#selectCouchSource").val("");
+    // reset textbox holding selected source couch server's address
+    $("#txtboxCouchServerSrc").val("");
+    selectedResourceIdsFinal = []; // reinitialise array on window reload/refresh
     selectedCourseIdsFinal = [];
 });
 
@@ -187,9 +187,64 @@ function showTheseCollectionsOnTheSelectCollectionsPanel(majorCollectionsFetched
     $("#selectCollections").append(collectionsList);
 }
 
+function showAllResourcesOnThisPanelAsChecked(resourcesFetched, jQueryPanelId) {
+    // check all courses selectedCourseIdsFinal
+    var resourceId;
+    for (var i = resourcesFetched.length - 1; i >= 0; i--) {
+        resourceId = resourcesFetched[i].id;
+        // $("#" + resourceId).prop('checked', true);
+        if(selectedResourceIdsFinal.indexOf(resourceId) == -1) {// if resource is already NOT in the 'selectedCourseIdsFinal' array
+            // then put it in
+            selectedResourceIdsFinal.push(resourceId);
+        }
+//        $(jQueryPanelId).find("#" + resourceId).prop('checked', true);
+        $("#selectResources").find("#" + resourceId).prop('checked', true);
+        $("#collectionMemberResourcesPanel").find("#" + resourceId).prop('checked', true);
+    }
+}
+
+function showAllResourcesOnThisPanelAsUnChecked(resourcesFetched, jQueryPanelId) {
+    var resourceId, position;
+    for (var i = resourcesFetched.length - 1; i >= 0; i--) {
+        resourceId = resourcesFetched[i].id;
+        // uncheck this course in the 'selectResources' panel if it is among those currently opened in that panel
+        position = selectedResourceIdsFinal.indexOf(resourceId);
+        if (position > -1) {
+            selectedResourceIdsFinal.splice(position, 1);
+        }
+//        $(jQueryPanelId).find("#" + resourceId).prop('checked', false);
+        $("#selectResources").find("#" + resourceId).prop('checked', false);
+        $("#collectionMemberResourcesPanel").find("#" + resourceId).prop('checked', false);
+    }
+}
+
+function addSelectAllOptionToThisPanel(panelId, resourcesFetched) {
+    var jQueryIdOfPanel = "#" + panelId;
+    // add select all checkbox to the panel
+    var selAllCheckbox = document.createElement('input');
+    selAllCheckbox.type = "checkbox";    selAllCheckbox.name = panelId + "CheckAll";    selAllCheckbox.id = panelId + "CheckAll";
+    var label = document.createElement('label');    label.htmlFor = panelId + "CheckAll";    label.style.fontWeight = 'bold';
+    label.appendChild(document.createTextNode("Select all"));
+    var br = document.createElement('br');
+    selAllCheckbox.onclick = function() {
+        if ($(this).is(':checked')) { // the click resulted in checking/ticking the checkbox
+            // mark all resource checkboxes on this panel as checked
+            showAllResourcesOnThisPanelAsChecked(resourcesFetched, jQueryIdOfPanel);
+        } else {
+            showAllResourcesOnThisPanelAsUnChecked(resourcesFetched, jQueryIdOfPanel);
+        }
+    };
+    $(jQueryIdOfPanel).append(selAllCheckbox); $(jQueryIdOfPanel).append(label); $(jQueryIdOfPanel).append(br);
+}
+
 function showTheseResourcesOnThisPanel(resourcesFetched, panelName) {
 	var jQueryPanelId = "#" + panelName;
 	$(jQueryPanelId).html('');
+    // if number of resources fetched > 0  "#divSelectAllResources"
+    if(panelName === "selectResources") {
+        var idPanelForSelectAllOption = "divSelectAllResources";
+        addSelectAllOptionToThisPanel(idPanelForSelectAllOption, resourcesFetched);
+    }
 	for(var i = 0; i < resourcesFetched.length; i++) { 
     	var resourceInfo = resourcesFetched[i];
     	var checkbox = document.createElement('input');
@@ -240,7 +295,6 @@ socket.on('dataFromChosenBeLLCouch', function(data) {
 		// remove submit button so that it does not get added twice
 		$("#submitButton").remove();
 		$("#selectCoursesHead").text("All Courses");
-
 		$("#selectResourcesHead").text("All Resources");	
 		$("#selectCollectionsHead").text("All Collections");
 		$("#selectCollectionMemberResourcesHead").text("Contents Of Chosen Collection");	
