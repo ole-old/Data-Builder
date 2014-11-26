@@ -32,7 +32,6 @@ function uncheckAllCheckBoxes() {
 socket.on('statusOnStarterDataPrep', function(statusMsg) {	
 	if (statusMsg.err) {
 		alert("Failed to prepare data out of chosen items.\n Error: " + statusMsg.err.error + "\n Plz try again");
-        uncheckAllCheckBoxes();
 	} else {
 		// enable button and show status of starter-data-prep task
 		alert("Successfully prepared data out of chosen items. \nPlease pick all contents inside the folder 'StarterDataLocation' of " + 
@@ -43,6 +42,7 @@ socket.on('statusOnStarterDataPrep', function(statusMsg) {
 	stopActivityIndicator(activityIndicatorPanelJqueryId);
 	$('input[name="submitButton"]').removeAttr('disabled');
 	$('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
+    uncheckAllCheckBoxes();
 	selectedResourceIdsFinal = [];
     selectedCourseIdsFinal = [];
 });	
@@ -218,11 +218,16 @@ function showAllResourcesOnThisPanelAsUnChecked(resourcesFetched, jQueryPanelId)
     }
 }
 
-function addSelectAllOptionToThisPanel(panelId, resourcesFetched) {
+function addSelectAllOptionToThisPanel(panelId, resourcesFetched, countOfResourcesChecked) {
     var jQueryIdOfPanel = "#" + panelId;
     // add select all checkbox to the panel
-    var selAllCheckbox = document.createElement('input');
-    selAllCheckbox.type = "checkbox";    selAllCheckbox.name = panelId + "CheckAll";    selAllCheckbox.id = panelId + "CheckAll";
+    $(jQueryIdOfPanel).html('');
+    var selAllCheckbox = document.createElement('input');    selAllCheckbox.type = "checkbox";    
+    selAllCheckbox.name = panelId + "CheckAll";    selAllCheckbox.id = panelId + "CheckAll";
+    if (countOfResourcesChecked === resourcesFetched.length) {
+        // show the select all checkbox for this panel as checked too
+        selAllCheckbox.checked = true;
+    }
     var label = document.createElement('label');    label.htmlFor = panelId + "CheckAll";    label.style.fontWeight = 'bold';
     label.appendChild(document.createTextNode("Select all"));
     var br = document.createElement('br');
@@ -239,12 +244,8 @@ function addSelectAllOptionToThisPanel(panelId, resourcesFetched) {
 
 function showTheseResourcesOnThisPanel(resourcesFetched, panelName) {
 	var jQueryPanelId = "#" + panelName;
-	$(jQueryPanelId).html('');
-    // if number of resources fetched > 0  "#divSelectAllResources"
-    if(panelName === "selectResources") {
-        var idPanelForSelectAllOption = "divSelectAllResources";
-        addSelectAllOptionToThisPanel(idPanelForSelectAllOption, resourcesFetched);
-    }
+	$(jQueryPanelId).html('');    
+    var countOfResourcesChecked = 0;
 	for(var i = 0; i < resourcesFetched.length; i++) { 
     	var resourceInfo = resourcesFetched[i];
     	var checkbox = document.createElement('input');
@@ -254,6 +255,7 @@ function showTheseResourcesOnThisPanel(resourcesFetched, panelName) {
 		checkbox.value = resourceInfo.id;
 		if(selectedResourceIdsFinal.indexOf(resourceInfo.id) > -1) { // resource already checked by user
 			checkbox.checked = true;
+            countOfResourcesChecked++;
 		}
 		var label = document.createElement('label');
 		label.id = "label" + resourceInfo.id;
@@ -267,7 +269,10 @@ function showTheseResourcesOnThisPanel(resourcesFetched, panelName) {
 				var resourceId = $(this).val();
 				$("#selectResources").find("#" + resourceId).prop('checked', true);
 				$("#collectionMemberResourcesPanel").find("#" + resourceId).prop('checked', true);
-				selectedResourceIdsFinal.push(resourceId);
+                var position = selectedResourceIdsFinal.indexOf(resourceId);
+                if (position == -1) {
+    				selectedResourceIdsFinal.push(resourceId);
+                }
 			} else { // the click resulted in unchecking the checkbox
 				// remove id of this resource from the selectedResourceIdsFinal array
 				var resourceId = $(this).val();
@@ -281,6 +286,11 @@ function showTheseResourcesOnThisPanel(resourcesFetched, panelName) {
 		}
 		$(jQueryPanelId).append(checkbox); $(jQueryPanelId).append(label); $(jQueryPanelId).append(br);
  	}
+    // if number of resources fetched > 0  "#divSelectAllResources"
+    if(panelName === "selectResources") {
+        var idPanelForSelectAllOption = "divSelectAllResources";
+        addSelectAllOptionToThisPanel(idPanelForSelectAllOption, resourcesFetched, countOfResourcesChecked);
+    }    
 }
 
 socket.on('dataFromChosenBeLLCouch', function(data) {
