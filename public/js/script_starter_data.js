@@ -326,10 +326,13 @@ socket.on('dataFromChosenBeLLCouch', function(data) {
 	 	}
 	 	// append the form submit equivalent button (not exactly a form submit button but just a button to act like that)
 	 	var button = document.createElement("input");
+	    
 	    button.type = "button";
 	    button.value = "Prepare Starter Data"; 
 	    button.name = "submitButton"; 
-	    button.id = "submitButton";  
+	    button.className = "button";
+	    button.id = "submitButton";
+
 	    button.onclick = function() { // Note this is a function
 	        prepareStarterData(this);
 	    };
