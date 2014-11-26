@@ -290,7 +290,10 @@ function showTheseResourcesOnThisPanel(resourcesFetched, panelName) {
     if(panelName === "selectResources") {
         var idPanelForSelectAllOption = "divSelectAllResources";
         addSelectAllOptionToThisPanel(idPanelForSelectAllOption, resourcesFetched, countOfResourcesChecked);
-    }    
+    } else if (panelName === "selectCollectionMemberResources") {
+        var idPanelForSelectAllOption = "contentsOfCollection";
+        addSelectAllOptionToThisPanel(idPanelForSelectAllOption, resourcesFetched, countOfResourcesChecked);
+    }
 }
 
 socket.on('dataFromChosenBeLLCouch', function(data) {
@@ -354,60 +357,11 @@ socket.on('dataFromChosenBeLLCouch', function(data) {
 socket.on('resourcesDataForChosenCollection', function(collectionData) {
 	if(collectionData.err !== null && collectionData.err !== undefined) {
 		alert("Failed to fetch resources-data for the chosen collection. Plz try again");
-	} else {		
-		var activityIndicatorPanelJqueryId = "#selectCollectionMemberResources";
-    	stopActivityIndicator(activityIndicatorPanelJqueryId);
-		$("#selectCollectionMemberResourcesHead").text("Contents Of Collection: " + collectionData.collectionName);	
-		// display the select-all checkbox if the data fetched for chosen collection has atleast one record in it
-		if(collectionData.data.length > 0) {
-			var checkbox = document.createElement('input');
-			checkbox.type = "checkbox";
-			checkbox.name = "checkAllContentsOfCollection";
-			checkbox.id = "checkAllContentsOfCollection";
-			checkbox.value = "checkAllContentsOfCollection";
-			var label = document.createElement('label');
-			label.htmlFor = "checkAllContentsOfCollection";
-			label.style.fontWeight = 'bold';
-			label.appendChild(document.createTextNode("Select all"));
-			var br = document.createElement('br');
-			checkbox.onclick = function() {
-				if($(this).is(':checked')) { // the click resulted in checking/ticking the checkbox
-					// check all contents of this collection and also push their ids into the array selectedResourceIdsFinal
-					var resourceId;
-					for (var i = collectionData.data.length - 1; i >= 0; i--) {
-						resourceId = collectionData.data[i].id;
-						// $("#" + resourceId).prop('checked', true);
-						if(selectedResourceIdsFinal.indexOf(resourceId) == -1) {// if resource is already NOT in the 'selectedResourceIdsFinal' array 
-							// then put it in
-							selectedResourceIdsFinal.push(resourceId);
-						}	
-						$("#selectResources").find("#" + resourceId).prop('checked', true);
-						$("#collectionMemberResourcesPanel").find("#" + resourceId).prop('checked', true);											
-					};
-				} else { // the click resulted in unchecking this checkbox
-					// alert("UNchecked: " + $(this).val());
-					// remove id of this resource from the selectedResourceIdsFinal array
-					var position, resourceId;
-					for (var i = collectionData.data.length - 1; i >= 0; i--) {
-						resourceId = collectionData.data[i].id;
-						$("#" + resourceId).prop('checked', false);
-						// uncheck this resource in the 'all resources panel' if it is among those currently opened in that panel
-						$("#selectResources").find("#" + resourceId).prop('checked', false);
-						$("#collectionMemberResourcesPanel").find("#" + resourceId).prop('checked', false);
-						position = selectedResourceIdsFinal.indexOf(resourceId);
-						if (position > -1) {
-							selectedResourceIdsFinal.splice(position, 1);
-						}
-					};
-				}
-			}
-			$("#contentsOfCollection").html(''); $("#contentsOfCollection").append(checkbox); $("#contentsOfCollection").append(label);
-			$("#contentsOfCollection").append(br);
-		} else {
-            $("#contentsOfCollection").html('');
-        }
-		var panelToShowFetchedResourcesOn = "selectCollectionMemberResources";
-		showTheseResourcesOnThisPanel(collectionData.data, panelToShowFetchedResourcesOn);
+	} else {	
+        var panelInFocus = "selectCollectionMemberResources";
+    	stopActivityIndicator("#" + panelInFocus);
+		$("#selectCollectionMemberResourcesHead").text("Contents Of Collection: " + collectionData.collectionName);
+		showTheseResourcesOnThisPanel(collectionData.data, panelInFocus);
 	}
 });	
 
