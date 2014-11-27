@@ -405,6 +405,29 @@ module.exports = function (localCouchServer, sourceCouchServer) {
       });
   };
 
+  functions.fetchWelcomeVideoResource = function(callback) {
+      var resourcesDb = sourceCouchDb.db.use('resources');
+      resourcesDb.view('bell', 'welcomeVideo', {include_docs: true}, function(err, resp) {
+          if (err && err.reason !== 'missing_named_view') {
+              console.log("dbInteractions.js:: fetchWelcomeVideoResource:: error fetching docs of db: " + 'resources'); console.log(err);
+              callback(err);
+          } else if (err && err.reason === 'missing_named_view') {
+              // return empty resources array
+              var arrResources = [];
+              callback(null, arrResources);
+          } else {
+              var arrResources = [];
+              var resourceIdAndTitle;
+              console.log("fetched welcome video resource: (" + resp.rows.length + " doc)");
+              resp.rows.forEach( function(resourceDocContainer) {
+                  resourceIdAndTitle = {id: resourceDocContainer.doc._id, name: resourceDocContainer.doc.title};
+                  arrResources.push(resourceIdAndTitle);
+              });
+              callback(null, arrResources);
+          }
+      });
+  };
+
   functions.fetchResourcesPointingToThisCollection = function(collectionId, collectionName, callback) {
     var resourcesDb = sourceCouchDb.db.use('resources');
     var resourcesViewkeys = [collectionId];
@@ -415,7 +438,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
       } else {
         var arrResources = [];
         var resourceIdAndTitle;
-        console.log("fetched resources count for collection: " + collectionName + "(" + collectionId + "): " + resp.rows.length);
+        console.log("fetched resources count for collection: " + collectionName + " (" + collectionId + "): " + resp.rows.length);
         resp.rows.forEach( function(resourceDocContainer) {
           resourceIdAndTitle = {id: resourceDocContainer.doc._id, name: resourceDocContainer.doc.title};
           arrResources.push(resourceIdAndTitle);

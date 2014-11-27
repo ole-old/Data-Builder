@@ -29,7 +29,7 @@ function uncheckAllCheckBoxes() {
     $('input:checkbox').removeAttr('checked');
 }
 
-socket.on('statusOnStarterDataPrep', function(statusMsg) {	
+socket.on('statusOnStarterDataPrep', function(statusMsg) {
 	if (statusMsg.err) {
 		alert("Failed to prepare data out of chosen items.\n Error: " + statusMsg.err.error + "\n Plz try again");
 	} else {
@@ -42,7 +42,7 @@ socket.on('statusOnStarterDataPrep', function(statusMsg) {
 	stopActivityIndicator(activityIndicatorPanelJqueryId);
 	$('input[name="submitButton"]').removeAttr('disabled');
 	$('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
-    uncheckAllCheckBoxes();
+    uncheckAllCheckBoxes(); // shouldn't the default preselected resource ids remain checked or get checked again?
 	selectedResourceIdsFinal = [];
     selectedCourseIdsFinal = [];
 });	
@@ -224,7 +224,7 @@ function addSelectAllOptionToThisPanel(panelId, resourcesFetched, countOfResourc
     $(jQueryIdOfPanel).html('');
     var selAllCheckbox = document.createElement('input');    selAllCheckbox.type = "checkbox";    
     selAllCheckbox.name = panelId + "CheckAll";    selAllCheckbox.id = panelId + "CheckAll";
-    if (countOfResourcesChecked === resourcesFetched.length) {
+    if (resourcesFetched.length > 0 && countOfResourcesChecked === resourcesFetched.length) {
         // show the select all checkbox for this panel as checked too
         selAllCheckbox.checked = true;
     }
@@ -296,9 +296,19 @@ function showTheseResourcesOnThisPanel(resourcesFetched, panelName) {
     }
 }
 
+function receivePreSelectedResourceIds (preSelectedResources) {
+    if (preSelectedResources !== null) {
+        var size = preSelectedResources.length;
+        for (var i = 0; i < size; i++) {
+            selectedResourceIdsFinal.push(preSelectedResources[i].id);
+        }
+    }
+}
+
 socket.on('dataFromChosenBeLLCouch', function(data) {
-	selectedResourceIdsFinal = [], selectedCourseIdsFinal = [];
-	$('input[name="submitButton"]').removeAttr('disabled');
+    selectedResourceIdsFinal = [], selectedCourseIdsFinal = [];
+    receivePreSelectedResourceIds(data.preSelectedResources);
+    $('input[name="submitButton"]').removeAttr('disabled');
 	$('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
 	var activityIndicatorPanelJqueryId = "#popup-spinning";
 	stopActivityIndicator(activityIndicatorPanelJqueryId);
@@ -373,13 +383,6 @@ function prepareStarterData(event) {
 	$('input[name="submitButton"]').attr('disabled','disabled');
 	$('input[name="submitSourceCouchAddr"]').attr('disabled','disabled');
 	$("#socketRespFromServer").html('');
-//	var ids = [], resourceIds = [];
-//	$('#selectCourses input:checked').each(function() {
-//	    ids.push($(this).val());
-//	});
-	// $('#selectResources input:checked').each(function() {
-	//     resourceIds.push($(this).val());
-	// });
 	if ( (selectedCourseIdsFinal.length === 0) && (selectedResourceIdsFinal.length === 0) ) {
 		alert("You did not choose any items");
         stopActivityIndicator(activityIndicatorPanelJqueryId);

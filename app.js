@@ -107,25 +107,60 @@ io.sockets.on('connection', function (socketInst) {
 	});
 
 	socketInst.on('fetchDataFromIdentifiedBeLLCouchServer', function(serverData) {
-		var dataFromBeLL = {arrCourses: null, arrResouces: null, arrMajorCollections: null, arrSubCollections: null, heading: null, resourcesCount: null, err: null};
+		var dataFromBeLL = {arrCourses: null, arrResouces: null, arrMajorCollections: null, arrSubCollections: null,
+                            heading: null, resourcesCount: null, preSelectedResources: null, err: null};
 		// set source couchdb address according to user's choice before fetching data
 		dao.setSourceCouchServerAddress(serverData.sourceCouchAddr); 
 		// fetch all courses and resources data and then pass them to the view "starter_data.html"	
-		async.series([
+		async.waterfall([
 			function(callback){
 				dao.fetchAllCourseDocs(callback);
 			},
-			function(callback){
+			function(result, callback){
+                dataFromBeLL.arrCourses = result;
 				var pageNumber = 1;
 				dao.fetchResourceDocsWithoutAttachmentsForSelectedPage(pageNumber, callback);
 			},
-            function(callback) {
+            function(result, callback) {
+                dataFromBeLL.arrResources = result;
                 var pageNumber = 1;
                 dao.fetchCollectionsForSelectedPage(pageNumber, callback);
             },
-			function(callback) {
+			function(result, callback) {
+                dataFromBeLL.arrMajorCollections = result.majorCollectionIdsAndNames;
+                dataFromBeLL.arrSubCollections = result.subCollectionIdsAndNames;
 				dao.getResourcesCountFromSourceCouch(callback);
-			}
+			},
+            function(result, callback) {
+                dataFromBeLL.resourcesCount = result;
+                var collectionName = "*BeLL User Guide*";
+                var collectionId; // its value is 'undefined' after declaration
+                if (dataFromBeLL.arrMajorCollections !== null && dataFromBeLL.arrMajorCollections.length > 0) {
+                    var size = dataFromBeLL.arrMajorCollections.length;
+                    for (var i = 0; i < size; i++) {
+                        if (dataFromBeLL.arrMajorCollections[i].name === collectionName) {
+                            // pick the index and fetch ids of all resources in this collection
+                            collectionId = dataFromBeLL.arrMajorCollections[i].id;
+                            break;
+                        }
+                    }
+                    if (collectionId) { // if its not undefined, fetch the constituent resources of collection
+                        dao.fetchResourcesPointingToThisCollection(collectionId, collectionName, callback);
+                    } else {
+                        console.log("app.js:: socketInst.on:'fetchDataFromIdentifiedBeLLCouchServer':: source system has no collection with name " +
+                                        collectionName);
+                        callback();
+                    }
+                } else {
+                    console.log("app.js:: socketInst.on:'fetchDataFromIdentifiedBeLLCouchServer':: source system has no collections in it");
+                    callback();
+                }
+            },
+            function(result, callback) {
+                dataFromBeLL.preSelectedResources = result;
+                // get the welcome video resource now and add that to preSelectedResources
+                dao.fetchWelcomeVideoResource(callback);
+            }
 		], function (err, result) {
 			if (err) {
 				console.log("app.js:: error in final callback of fetching all courses");
@@ -133,11 +168,23 @@ io.sockets.on('connection', function (socketInst) {
 				socketInst.emit('dataFromChosenBeLLCouch', dataFromBeLL);
 			} else {
 				// result[0] has the output from first function in the series block, result[1] has output from second func in the block
-				dataFromBeLL.arrCourses = result[0];
-				dataFromBeLL.arrResources = result[1];
-                dataFromBeLL.arrMajorCollections = result[2].majorCollectionIdsAndNames;
-                dataFromBeLL.arrSubCollections = result[2].subCollectionIdsAndNames
-				dataFromBeLL.resourcesCount = result[3];
+//				dataFromBeLL.arrCourses = result[0];
+//				dataFromBeLL.arrResources = result[1];
+//                dataFromBeLL.arrMajorCollections = result[2].majorCollectionIdsAndNames;
+//                dataFromBeLL.arrSubCollections = result[2].subCollectionIdsAndNames;
+//				dataFromBeLL.resourcesCount = result[3];
+
+                if (result !== null && result.length > 0) {
+                    var welcomeVideoResource = result[0];
+                    if (dataFromBeLL.preSelectedResources !== null) {
+                        dataFromBeLL.preSelectedResources.push(welcomeVideoResource);
+                    } else { // if dataFromBeLL.preSelectedResources is null
+                        dataFromBeLL.preSelectedResources = [];
+                        dataFromBeLL.preSelectedResources.push(welcomeVideoResource);
+                    }
+                } else {
+                    console.log("welcome video resource does not exist on source");
+                }
 				dataFromBeLL.heading = 'Installer Data Selection Form';
 				socketInst.emit('dataFromChosenBeLLCouch', dataFromBeLL);
 			}
