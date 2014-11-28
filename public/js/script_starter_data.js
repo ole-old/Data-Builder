@@ -1,4 +1,4 @@
-var selectedResourceIdsFinal = [], selectedCourseIdsFinal = [];
+var selectedResourceIdsFinal, selectedCourseIdsFinal, defaultSelectedResourceIds;
 var wheel = null;
 $(document).ready(function() {
     $('input[name="submitButton"]').removeAttr('disabled');
@@ -9,6 +9,7 @@ $(document).ready(function() {
     $("#txtboxCouchServerSrc").val("");
     selectedResourceIdsFinal = []; // reinitialise array on window reload/refresh
     selectedCourseIdsFinal = [];
+    defaultSelectedResourceIds = [];
 });
 
 function startActivityIndicator(jQueryPanelId) {
@@ -42,10 +43,43 @@ socket.on('statusOnStarterDataPrep', function(statusMsg) {
 	stopActivityIndicator(activityIndicatorPanelJqueryId);
 	$('input[name="submitButton"]').removeAttr('disabled');
 	$('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
-    uncheckAllCheckBoxes(); // shouldn't the default preselected resource ids remain checked or get checked again?
+    // reset/uncheck selected items except for resourceIds in defaultSelectedResourceIds list
 	selectedResourceIdsFinal = [];
     selectedCourseIdsFinal = [];
+    uncheckAllCheckBoxes();
+    receivePreSelectedResourceIds();
+    checkAllCheckBoxesForDefaultSelectedItems(); // shouldn't the default preselected resource ids remain checked or get checked again?
 });	
+
+function checkAllCheckBoxesForDefaultSelectedItems () {
+    // iterate over each resources panel and mark those checkboxes as checked whose ids exist in selectedResourceIds array
+    var isDefaultSelectedResource, count = 0;
+    $("#selectResources input[type=checkbox]").each(function() {
+        isDefaultSelectedResource = (selectedResourceIdsFinal.indexOf($(this).val()) > -1) ? true : false; //
+        if (isDefaultSelectedResource) {
+            $(this).prop('checked', true);
+        } else {
+            $(this).prop('checked', false);
+            count++;
+        }
+    });
+    if (count === 0) {
+        $("#divSelectAllResources input[type=checkbox]").prop('checked', true);
+    }
+    count = 0;
+    $("#selectCollectionMemberResources input[type=checkbox]").each(function() {
+        isDefaultSelectedResource = (selectedResourceIdsFinal.indexOf($(this).val()) > -1) ? true : false; //
+        if (isDefaultSelectedResource) {
+            $(this).prop('checked', true);
+        } else {
+            $(this).prop('checked', false);
+            count++;
+        }
+    });
+    if (count === 0) {
+        $("#contentsOfCollection input[type=checkbox]").prop('checked', true);
+    }
+}
 
 socket.on('resourcesDataForSelectedPage', function(resourcesForThePage) {
 	if (resourcesForThePage.err) {
@@ -296,18 +330,22 @@ function showTheseResourcesOnThisPanel(resourcesFetched, panelName) {
     }
 }
 
-function receivePreSelectedResourceIds (preSelectedResources) {
-    if (preSelectedResources !== null) {
-        var size = preSelectedResources.length;
+function receivePreSelectedResourceIds () {
+    if (defaultSelectedResourceIds !== null) {
+        var size = defaultSelectedResourceIds.length;
         for (var i = 0; i < size; i++) {
-            selectedResourceIdsFinal.push(preSelectedResources[i].id);
+            selectedResourceIdsFinal.push(defaultSelectedResourceIds[i]);
         }
     }
 }
 
 socket.on('dataFromChosenBeLLCouch', function(data) {
-    selectedResourceIdsFinal = [], selectedCourseIdsFinal = [];
-    receivePreSelectedResourceIds(data.preSelectedResources);
+    selectedResourceIdsFinal = [], selectedCourseIdsFinal = [], defaultSelectedResourceIds = [];
+    var size = data.preSelectedResources.length;
+    for (var i = 0; i < size; i++) {
+        defaultSelectedResourceIds[i] = data.preSelectedResources[i].id;
+    }
+    receivePreSelectedResourceIds();
     $('input[name="submitButton"]').removeAttr('disabled');
 	$('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
 	var activityIndicatorPanelJqueryId = "#popup-spinning";
