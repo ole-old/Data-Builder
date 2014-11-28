@@ -82,6 +82,7 @@ io.sockets.on('connection', function (socketInst) {
 			} else {
 				// emit resources data for this page = pageNumber
 				dataForChosenCollection.data = result;
+                dataForChosenCollection.selectedCollection = {id: collectionId, name: collectionName};
 				socketInst.emit('resourcesDataForChosenCollection', dataForChosenCollection);
 			}
 		});
@@ -108,7 +109,7 @@ io.sockets.on('connection', function (socketInst) {
 
 	socketInst.on('fetchDataFromIdentifiedBeLLCouchServer', function(serverData) {
 		var dataFromBeLL = {arrCourses: null, arrResouces: null, arrMajorCollections: null, arrSubCollections: null,
-                            heading: null, resourcesCount: null, preSelectedResources: null, err: null};
+                            heading: null, resourcesCount: null, preSelectedResources: null, preSelectedCollection: null, err: null};
 		// set source couchdb address according to user's choice before fetching data
 		dao.setSourceCouchServerAddress(serverData.sourceCouchAddr); 
 		// fetch all courses and resources data and then pass them to the view "starter_data.html"	
@@ -141,18 +142,18 @@ io.sockets.on('connection', function (socketInst) {
                         if (dataFromBeLL.arrMajorCollections[i].name === collectionName) {
                             // pick the index and fetch ids of all resources in this collection
                             collectionId = dataFromBeLL.arrMajorCollections[i].id;
+                            dataFromBeLL.preSelectedCollection = {id: collectionId, name: collectionName};
                             break;
                         }
                     }
                     if (collectionId) { // if its not undefined, fetch the constituent resources of collection
                         dao.fetchResourcesPointingToThisCollection(collectionId, collectionName, callback);
                     } else {
-                        console.log("app.js:: socketInst.on:'fetchDataFromIdentifiedBeLLCouchServer':: source system has no collection with name " +
-                                        collectionName);
+                        console.log("source system has no collection with name: " + collectionName);
                         callback();
                     }
                 } else {
-                    console.log("app.js:: socketInst.on:'fetchDataFromIdentifiedBeLLCouchServer':: source system has no collections in it");
+                    console.log("source system has no collections in it");
                     callback();
                 }
             },
@@ -168,12 +169,6 @@ io.sockets.on('connection', function (socketInst) {
 				socketInst.emit('dataFromChosenBeLLCouch', dataFromBeLL);
 			} else {
 				// result[0] has the output from first function in the series block, result[1] has output from second func in the block
-//				dataFromBeLL.arrCourses = result[0];
-//				dataFromBeLL.arrResources = result[1];
-//                dataFromBeLL.arrMajorCollections = result[2].majorCollectionIdsAndNames;
-//                dataFromBeLL.arrSubCollections = result[2].subCollectionIdsAndNames;
-//				dataFromBeLL.resourcesCount = result[3];
-
                 if (result !== null && result.length > 0) {
                     var welcomeVideoResource = result[0];
                     if (dataFromBeLL.preSelectedResources !== null) {
@@ -205,6 +200,9 @@ io.sockets.on('connection', function (socketInst) {
 				// create dbs to prepare data
 				dao.createDbs(callback);
 			},
+            function(callback){
+                dao.prepareCollectionsDataForInstaller(selectedCoursesAndResources.collectionIds, callback);
+            },
 			function(callback){
 				dao.prepareResourcesDataForInstaller(selectedCoursesAndResources, callback);
 			},

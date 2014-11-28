@@ -1,5 +1,4 @@
-var selectedResourceIdsFinal, selectedCourseIdsFinal, defaultSelectedResourceIds;
-var wheel = null;
+var selectedResourceIdsFinal, selectedCourseIdsFinal, defaultSelectedResourceIds, resourceCollectionMap = {};
 $(document).ready(function() {
     $('input[name="submitButton"]').removeAttr('disabled');
     $('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
@@ -10,6 +9,7 @@ $(document).ready(function() {
     selectedResourceIdsFinal = []; // reinitialise array on window reload/refresh
     selectedCourseIdsFinal = [];
     defaultSelectedResourceIds = [];
+    resourceCollectionMap = {};
 });
 
 function startActivityIndicator(jQueryPanelId) {
@@ -340,10 +340,14 @@ function receivePreSelectedResourceIds () {
 }
 
 socket.on('dataFromChosenBeLLCouch', function(data) {
-    selectedResourceIdsFinal = [], selectedCourseIdsFinal = [], defaultSelectedResourceIds = [];
+//    alert("preselected_collection: " + data.preSelectedCollection.name + " (" + data.preSelectedCollection.id + ")");
+    selectedResourceIdsFinal = [], selectedCourseIdsFinal = [], defaultSelectedResourceIds = [], resourceCollectionMap = {};
     var size = data.preSelectedResources.length;
     for (var i = 0; i < size; i++) {
         defaultSelectedResourceIds[i] = data.preSelectedResources[i].id;
+        if (data.preSelectedCollection !== null && data.preSelectedCollection !== undefined) {
+            resourceCollectionMap[data.preSelectedResources[i].id] = data.preSelectedCollection.id;
+        }
     }
     receivePreSelectedResourceIds();
     $('input[name="submitButton"]').removeAttr('disabled');
@@ -403,9 +407,15 @@ socket.on('dataFromChosenBeLLCouch', function(data) {
 });	
 
 socket.on('resourcesDataForChosenCollection', function(collectionData) {
-	if(collectionData.err !== null && collectionData.err !== undefined) {
+	if(collectionData.err !== null && collectionData.err !== undefined) { // there is some error
 		alert("Failed to fetch resources-data for the chosen collection. Plz try again");
-	} else {	
+	} else {
+//        alert("preselected_collection: " + collectionData.selectedCollection.name + " (" + collectionData.selectedCollection.id + ")");
+        // save collection name against these resource ids so that collectionid can be tracked on submitting form
+        var size = collectionData.data.length;
+        for (var i = 0; i < size; i++) {
+            resourceCollectionMap[collectionData.data[i].id] = collectionData.selectedCollection.id;
+        }
         var panelInFocus = "selectCollectionMemberResources";
     	stopActivityIndicator("#" + panelInFocus);
 		$("#selectCollectionMemberResourcesHead").text("Contents Of Collection: " + collectionData.collectionName);
@@ -426,8 +436,16 @@ function prepareStarterData(event) {
         stopActivityIndicator(activityIndicatorPanelJqueryId);
         $('input[name="submitButton"]').removeAttr('disabled');
         $('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
-	} else {		
-		var selectedCoursesAndResources = {courseIds: selectedCourseIdsFinal, resourceIds: selectedResourceIdsFinal};
+	} else {
+        // prepare array containing collectionids of every collection that selected by user from which > 0 resources were selected
+        var collectId, collectionIds = [], size = selectedResourceIdsFinal.length;
+        for (var i = 0; i < size; i++) {
+            collectId = resourceCollectionMap[selectedResourceIdsFinal[i]];
+            if ( (collectId !== null && collectId !== undefined) && (collectionIds.indexOf(collectId) === -1) ) {
+                collectionIds.push(collectId);
+            }
+        }
+		var selectedCoursesAndResources = {courseIds: selectedCourseIdsFinal, resourceIds: selectedResourceIdsFinal, collectionIds: collectionIds};
 		socket.emit('includeCoursesInStarterData', selectedCoursesAndResources);
 	}
 }

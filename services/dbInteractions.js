@@ -110,11 +110,29 @@ module.exports = function (localCouchServer, sourceCouchServer) {
           // console.log("replicated successfully");
           // console.log(body);  console.log("<----------------------------->");
           // prepare tags data for resources
-          console.log("resources added to installer data for followingresIds: \n" + resourceIds);
-          functions.prepareTagsDataForResource(callback);
+          console.log("resources added to installer data for following resIds: \n" + resourceIds);
+//          functions.prepareTagsDataForResource(callback);
+          callback();
         } else {
           callback(err);
         }
+    });
+  };
+
+  functions.prepareCollectionsDataForInstaller = function(collectionIds, callback) {
+    var tagsDb = sourceCouchDb.db.use('collectionlist');
+    var starterTagsDb = couchDb.db.use('startercollectionlist');
+    // var referencedTagDocKeys = courseStepDoc.Tag;
+    // console.log(referencedTagDocKeys);
+    couchDb.db.replicate(tagsDb, starterTagsDb, { doc_ids: collectionIds }, function(err, body) {
+      if (!err) {
+          console.log("collections added to installer data for following collectionlistIds: \n" + collectionIds);
+          callback();
+      } else {
+          console.log("dbInteractions.js:: prepareCollectionsDataForInstaller:: error in replicating db " + 'collectionlist');
+          console.log(err);
+          callback(err);
+      }
     });
   };
 
@@ -145,7 +163,8 @@ module.exports = function (localCouchServer, sourceCouchServer) {
           // console.log(body);  console.log("<----------------------------->");
           // prepare tags data for resources
           console.log("resources for the course-step '" + courseStepDoc.title + "' added to installer data");
-          functions.prepareTagsDataForResource(callback);
+//          functions.prepareTagsDataForResource(callback);
+          callback();
         } else {
           callback(err);
         }
