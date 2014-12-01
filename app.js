@@ -109,7 +109,8 @@ io.sockets.on('connection', function (socketInst) {
 
 	socketInst.on('fetchDataFromIdentifiedBeLLCouchServer', function(serverData) {
 		var dataFromBeLL = {arrCourses: null, arrResouces: null, arrMajorCollections: null, arrSubCollections: null,
-                            heading: null, resourcesCount: null, preSelectedResources: null, preSelectedCollection: null, err: null};
+                            heading: null, resourcesCount: null, preSelectedResources: null, preSelectedResourcesCount: 0,
+                            preSelectedCollection: null, err: null};
 		// set source couchdb address according to user's choice before fetching data
 		dao.setSourceCouchServerAddress(serverData.sourceCouchAddr); 
 		// fetch all courses and resources data and then pass them to the view "starter_data.html"	
@@ -133,6 +134,7 @@ io.sockets.on('connection', function (socketInst) {
 				dao.getResourcesCountFromSourceCouch(callback);
 			},
             function(result, callback) {
+                dataFromBeLL.preSelectedResources = []; // so that it can never be null
                 dataFromBeLL.resourcesCount = result;
                 var collectionName = "*BeLL User Guide*";
                 var collectionId; // its value is 'undefined' after declaration
@@ -159,6 +161,7 @@ io.sockets.on('connection', function (socketInst) {
             },
             function(result, callback) {
                 dataFromBeLL.preSelectedResources = result;
+                dataFromBeLL.preSelectedResourcesCount = result.length;
                 // get the welcome video resource now and add that to preSelectedResources
                 dao.fetchWelcomeVideoResource(callback);
             }
@@ -171,12 +174,7 @@ io.sockets.on('connection', function (socketInst) {
 				// result[0] has the output from first function in the series block, result[1] has output from second func in the block
                 if (result !== null && result.length > 0) {
                     var welcomeVideoResource = result[0];
-                    if (dataFromBeLL.preSelectedResources !== null) {
-                        dataFromBeLL.preSelectedResources.push(welcomeVideoResource);
-                    } else { // if dataFromBeLL.preSelectedResources is null
-                        dataFromBeLL.preSelectedResources = [];
-                        dataFromBeLL.preSelectedResources.push(welcomeVideoResource);
-                    }
+                    dataFromBeLL.preSelectedResources.push(welcomeVideoResource); // last item in preSelectedResources array is welcome video
                 } else {
                     console.log("welcome video resource does not exist on source");
                 }

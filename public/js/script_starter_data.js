@@ -30,6 +30,21 @@ function uncheckAllCheckBoxes() {
     $('input:checkbox').removeAttr('checked');
 }
 
+function removeMappingsOfNoMoreSelectedItems () {
+    var defSelectedArrSize = defaultSelectedResourceIds.length;
+    if (defSelectedArrSize > 0) {
+        // temporarily hold the id of the collection which the default selected resources map to
+        // assumption: the resourceId at index 0 of defaultSelectedResourceIds array is not welcome video
+        var defaultSelResourcesCollectionId = resourceCollectionMap[defaultSelectedResourceIds[0]];
+        // remove all other entries (resourceIds) from the resource->collection map which do not map to the same collection
+        // that all of the default selected resource items map to
+        resourceCollectionMap = {};
+        for (var i = 0; i < defSelectedArrSize; i++) {
+            resourceCollectionMap[defaultSelectedResourceIds[i]] = defaultSelResourcesCollectionId;
+        }
+    }
+}
+
 socket.on('statusOnStarterDataPrep', function(statusMsg) {
 	if (statusMsg.err) {
 		alert("Failed to prepare data out of chosen items.\n Error: " + statusMsg.err.error + "\n Plz try again");
@@ -39,16 +54,19 @@ socket.on('statusOnStarterDataPrep', function(statusMsg) {
 			"the Startup-Data-Builder and \nplace (choosing overwrite option if prompted) them inside the " + 
 			"folder 'Starter_Data' of the Startup-Installation tool");
 	}
-	var activityIndicatorPanelJqueryId = "#popup-spinning";
+	var activityIndicatorPanelJqueryId = "#submitPanel";//"#selectionPanelsTable";//"#popup-spinning";
 	stopActivityIndicator(activityIndicatorPanelJqueryId);
 	$('input[name="submitButton"]').removeAttr('disabled');
 	$('input[name="submitSourceCouchAddr"]').removeAttr('disabled');
     // reset/uncheck selected items except for resourceIds in defaultSelectedResourceIds list
 	selectedResourceIdsFinal = [];
     selectedCourseIdsFinal = [];
+    // since all selected items are going to be reset except the default or preselected items, so the resourceId -> collectionId
+    // map should also be purged of the mappings for such items that are about to be deselected
+    removeMappingsOfNoMoreSelectedItems();
     uncheckAllCheckBoxes();
-    receivePreSelectedResourceIds();
-    checkAllCheckBoxesForDefaultSelectedItems(); // shouldn't the default preselected resource ids remain checked or get checked again?
+    receivePreSelectedResourceIds(); // copies all resourceIds from defaultSelectedResourceIds array to selectedResourceIdsFinal array
+    checkAllCheckBoxesForDefaultSelectedItems();
 });	
 
 function checkAllCheckBoxesForDefaultSelectedItems () {
@@ -340,14 +358,16 @@ function receivePreSelectedResourceIds () {
 }
 
 socket.on('dataFromChosenBeLLCouch', function(data) {
-//    alert("preselected_collection: " + data.preSelectedCollection.name + " (" + data.preSelectedCollection.id + ")");
     selectedResourceIdsFinal = [], selectedCourseIdsFinal = [], defaultSelectedResourceIds = [], resourceCollectionMap = {};
-    var size = data.preSelectedResources.length;
-    for (var i = 0; i < size; i++) {
-        defaultSelectedResourceIds[i] = data.preSelectedResources[i].id;
-        if (data.preSelectedCollection !== null && data.preSelectedCollection !== undefined) {
-            resourceCollectionMap[data.preSelectedResources[i].id] = data.preSelectedCollection.id;
-        }
+    for (var i = 0; i < data.preSelectedResourcesCount; i++) {
+        var defaultSelectedResourceId = data.preSelectedResources[i].id;
+        defaultSelectedResourceIds[i] = defaultSelectedResourceId;
+        resourceCollectionMap[defaultSelectedResourceId] = data.preSelectedCollection.id;
+    }
+    if ( (data.preSelectedResources.length - data.preSelectedResourcesCount) === 1) { // welcome video resource is included
+        // in preSelectedResources array but not in the preSelectedResourcesCount, so add it to the defaultSelectedResourceIds
+        // but not to the resourceCollectionMap. We are not interested in what collection it (welcome video) maps to.
+        defaultSelectedResourceIds[data.preSelectedResourcesCount] = data.preSelectedResources[data.preSelectedResourcesCount].id;
     }
     receivePreSelectedResourceIds();
     $('input[name="submitButton"]').removeAttr('disabled');
@@ -425,7 +445,7 @@ socket.on('resourcesDataForChosenCollection', function(collectionData) {
 
 function prepareStarterData(event) {
 	// turn on spinner
-	var activityIndicatorPanelJqueryId = "#popup-spinning";
+	var activityIndicatorPanelJqueryId = "#submitPanel";//"#selectionPanelsTable";
 	startActivityIndicator(activityIndicatorPanelJqueryId);
 	// make the button disabled and reset the status of starter data prep task and preferably show a spinner too
 	$('input[name="submitButton"]').attr('disabled','disabled');
