@@ -1,0 +1,4 @@
+[submodule "Bell-Installer-for-Windows"]
+	path = Bell-Installer-for-Windows
+	url = https://github.com/open-learning-exchange/Bell-Installer-for-Windows.git
+	branch = dev
