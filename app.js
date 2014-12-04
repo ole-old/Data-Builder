@@ -66,7 +66,25 @@ io.sockets.on('connection', function (socketInst) {
 				console.log("files shifted.. plz confirm!");
 			}
 		});
-	}); 
+	});
+
+    socketInst.on('socketSearchCourseRequest', function (sockRequestData) {
+        waterfall([
+            function(callback){
+                dao.fetchCourseDocWithName(sockRequestData.searchString, callback);
+            }
+        ], function (err, result) {
+            if (err) {
+                console.log("app.js:: socketInst.on('socketSearchCourseRequest'):: final callback error");
+                console.log(err);
+            } else {
+                // result contains course doc info for the searched name
+//                console.log(result);
+                var sockResponseData = {arrMatchingCourses: result}; // result might have 0 records in it
+                socketInst.emit('socketSearchCourseResponse', sockResponseData);
+            }
+        });
+    });
 
 	socketInst.on('fetchResourcesForThisCollection', function(collectionId, collectionName) {
 		waterfall([
@@ -81,7 +99,7 @@ io.sockets.on('connection', function (socketInst) {
 				socketInst.emit('resourcesDataForChosenCollection', dataForChosenCollection);
 			} else {
 				// emit resources data for this page = pageNumber
-				dataForChosenCollection.data = result;
+				dataForChosenCollection.data = result; // result can be an empty array but not null
                 dataForChosenCollection.selectedCollection = {id: collectionId, name: collectionName};
 				socketInst.emit('resourcesDataForChosenCollection', dataForChosenCollection);
 			}

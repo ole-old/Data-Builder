@@ -5,7 +5,7 @@
 
     <!-- Starter Data Builder CS Files -->
 	<link rel="stylesheet" href="css/style.css">
-
+    <link rel="stylesheet" href="css/jquery-ui-dialog.css">
     <!-- Foundaion CS Files -->
     <link rel="stylesheet" href="css/foundation.css">
     <link rel="stylesheet" href="css/foundation.min.css">  
@@ -15,9 +15,9 @@
 	<script src="js/jquery-1.7.2.js"></script>
 	<script src="js/socket.io-1.1.0.js"></script>
 	<script src="js/jquery.paginate.js"></script>
-	<script src="js/jquery.twbsPagination.js"></script>
     <script src="js/spin.js"></script>
     <script src="js/jquery.spin.js"></script>
+    <script src="js/jquery-ui.min.js"></script>
 
 
     <!-- Foundation JS Files -->
@@ -90,6 +90,22 @@
                         <td>
                             <div id="coursesPanel" name="coursesPanel">
                                 <h3 id="selectCoursesHead"></h3>
+
+                                <div class="row">
+                                    <div class="large-8 columns">
+
+                                        <div id="divSearchCourse"></div>
+
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="large-8 columns">
+
+                                        <div id="div-searched-courses"></div>
+
+                                    </div>
+                                </div>
+
                                 <div id="divSelectAllCourses"></div>
                                 <div id="selectCourses" name="selectCourses" style="overflow-y: auto; overflow-x: auto; height: 250px;"></div>
                             </div>

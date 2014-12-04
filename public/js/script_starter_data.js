@@ -384,6 +384,8 @@ socket.on('dataFromChosenBeLLCouch', function(data) {
 		$("#selectCollectionsHead").text("All Collections");
 		$("#selectCollectionMemberResourcesHead").text("Contents Of Chosen Collection");	
 		// append courses to courses panel/div #selectCourses
+        $("#divSearchCourse").html('<div class="col-xs-3" ><div class="right-inner-addon"><i class="icon-search"></i><input type="search" class="form-control" placeholder="Search" /></div></div>');
+
         populateSelectCoursesViewPanel(data.arrCourses);
 	 	// append resources to resources panel/div #selectCourses
 	 	var selectFromAllResourcesPanelId = "selectResources";
@@ -488,3 +490,73 @@ $('#selectCouchSource').on('change', function() {
 	var selectedOptionVal = $(this).val();
   $("#txtboxCouchServerSrc").val(selectedOptionVal);
 });
+
+$("#divSearchCourse").keyup(function(e){
+    if(e.keyCode == 13){
+        var searchString = $(".form-control").val();
+        if (searchString) {
+//            alert("search string: " + $(".form-control").val());
+            var data = {searchString: searchString}
+            socket.emit('socketSearchCourseRequest', data);
+        }
+    }
+});
+
+function addCourseCheckboxToNode(courseIdAndNameObj, node) {
+    var courseId = courseIdAndNameObj.id;
+    var checkbox = document.createElement('input');    checkbox.type = "checkbox";     checkbox.name = courseId;
+    checkbox.id = courseId;     checkbox.value = courseId;
+    var position = selectedCourseIdsFinal.indexOf(courseId);
+    if(position > -1) { // resource already checked by user
+        checkbox.checked = true;
+    }
+    var label = document.createElement('label'); label.id = "label" + courseId;   label.name = "label" + courseId;
+    label.appendChild(document.createTextNode(courseIdAndNameObj.name));
+    var br = document.createElement('br');
+    checkbox.onclick = function() {
+        var position = selectedCourseIdsFinal.indexOf(courseId); // must check this everytime checkbox is clicked
+        if($(this).is(':checked')) {
+            if (position == -1) { // courseId is prev not in the list of selected courses, then add it
+                selectedCourseIdsFinal.push(courseId);
+            }
+            $("#selectCourses").find("#" + courseId).prop('checked', true);
+        } else {
+            // uncheck this course in the 'selectCourses' panel if it is among those currently opened in that panel
+            if (position > -1) {
+                selectedCourseIdsFinal.splice(position, 1);
+            }
+            $("#selectCourses").find("#" + courseId).prop('checked', false);
+        }
+    };
+    node.append(checkbox); node.append(label); node.append(br);
+}
+
+socket.on('socketSearchCourseResponse', function(sockResponseData) {
+    $("#div-searched-courses").dialog({
+        dialogClass: "no-close",
+        resizable: true,
+        modal: true,
+        draggable: false,
+        title: "Course Search Result",
+        height: 250,
+        width: 400,
+        create: function (e, ui) {},
+        open: function( event, ui ) {
+            var arrCoursesFound = sockResponseData.arrMatchingCourses;
+            if (arrCoursesFound.length < 1) {
+                $(this).dialog().html('');
+                $(this).dialog().html('<label>Sorry, your search string did NOT match any course title</label>');
+            } else {
+                $(this).dialog().html('');
+                for (var i in arrCoursesFound) {
+                    addCourseCheckboxToNode(arrCoursesFound[i], $(this).dialog());
+                }
+            }
+        },
+        buttons: [ { text: "OK", click: function() { $( this ).dialog( "close" ); } } ]
+    });
+});
+
+//$("#divSearchCourse .form-control").bind("enterKey",function(e){
+//    alert("u pressed key #13");
+//});

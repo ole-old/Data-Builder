@@ -329,6 +329,27 @@ module.exports = function (localCouchServer, sourceCouchServer) {
     });    
   };
 
+  functions.fetchCourseDocWithName = function(courseTitle, callback) {
+    var coursesDb = sourceCouchDb.db.use('groups');
+    coursesDb.view('bell', 'sortedByTitle', {include_docs: true, key: courseTitle}, function(err, allDocsInfo) {
+        if (err) {
+            console.log("dbInteractions.js:: error executing view 'courseSearch' of db: " + 'groups'); console.log(err);
+            callback(err);
+        } else {
+            var arrCourses = [];
+            var courseIdAndTitle;
+            allDocsInfo.rows.forEach( function(courseDocContainer) {
+                if (courseDocContainer.doc.hasOwnProperty('views') === false) { // if the fetched doc is not a design doc
+                    courseIdAndTitle = {id: courseDocContainer.doc._id, name: courseDocContainer.doc.CourseTitle};
+                    arrCourses.push(courseIdAndTitle);
+                }
+            });
+            console.log("fetched courses with name(=" + courseTitle + "): " + arrCourses.length + " docs");
+            callback(null, arrCourses);
+        }
+    });
+  };
+
   functions.fetchAllCourseDocs = function(callback) {
     var coursesDb = sourceCouchDb.db.use('groups');
     coursesDb.view('bell', 'sortedByTitle', {include_docs: true}, function(err, allDocsInfo) {
