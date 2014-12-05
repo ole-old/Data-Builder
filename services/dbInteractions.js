@@ -313,7 +313,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
   functions.prepareCoursesDataForInstaller = function(selectedCoursesAndResources, dadyCallback) {
     async.waterfall([
       function(callback) {
-        // iterate over courseIds and prepare data for each course
+        // iterate over courseIds of selected courses and prepare data for each course
         var courseIds = selectedCoursesAndResources.courseIds;
         // console.log(courseIds);
         functions.prepareDataForCourses(courseIds, callback);        
@@ -329,9 +329,30 @@ module.exports = function (localCouchServer, sourceCouchServer) {
     });    
   };
 
+  functions.fetchCourseDocWithName = function(courseTitle, callback) {
+    var coursesDb = sourceCouchDb.db.use('groups');
+    coursesDb.view('bell', 'sortedByTitle', {include_docs: true, key: courseTitle}, function(err, allDocsInfo) {
+        if (err) {
+            console.log("dbInteractions.js:: error executing view 'courseSearch' of db: " + 'groups'); console.log(err);
+            callback(err);
+        } else {
+            var arrCourses = [];
+            var courseIdAndTitle;
+            allDocsInfo.rows.forEach( function(courseDocContainer) {
+                if (courseDocContainer.doc.hasOwnProperty('views') === false) { // if the fetched doc is not a design doc
+                    courseIdAndTitle = {id: courseDocContainer.doc._id, name: courseDocContainer.doc.CourseTitle};
+                    arrCourses.push(courseIdAndTitle);
+                }
+            });
+            console.log("fetched courses with name(=" + courseTitle + "): " + arrCourses.length + " docs");
+            callback(null, arrCourses);
+        }
+    });
+  };
+
   functions.fetchAllCourseDocs = function(callback) {
     var coursesDb = sourceCouchDb.db.use('groups');
-    coursesDb.list({include_docs: true}, function(err, allDocsInfo) {
+    coursesDb.view('bell', 'sortedByTitle', {include_docs: true}, function(err, allDocsInfo) {
       if (err) {
          console.log("error fetching docs of db: " + 'groups'); console.log(err);
          callback(err);
@@ -370,7 +391,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
     var resourcesDb = sourceCouchDb.db.use('resources');
     var limit = 15;
     var recordsToSkip = (pageNumber-1)*limit; // page#1 should skip (1-1)*20 records
-    resourcesDb.list({include_docs: true, limit: limit, skip: recordsToSkip}, function(err, allDocsInfo) {
+    resourcesDb.view('bell', 'sortresources',{include_docs: true, limit: limit, skip: recordsToSkip}, function(err, allDocsInfo) {
       if (err) {
          console.log("error fetching docs of db: " + 'resources'); console.log(err);
          callback(err);
