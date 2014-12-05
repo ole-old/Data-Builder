@@ -26,86 +26,53 @@
 </head>
 
 <body>
-
     <div class="row panel">
-
         <div class="large-12 columns" style="text-align:center; font-size:150%; font-weight:bold;">Open Learning Exchange - Startup Data Builder</div>
-
     </div>
-
-
     <div class="row panel">
-	
         <div class="row">
-
             <div class="large-3 large-offset-2 columns">Identify a BeLL Server :</div>
-
              <div class="large-5 columns">
                 <input type="text" id="txtboxCouchServerSrc" name="txtboxCouchServerSrc">
             </div>
-
             <div class="large-2 columns">
             </div>
-
         </div>
-
         <div class="row">
-
              <div class="large-5 large-offset-5 columns">
-
                 <select id="selectCouchSource" name="selectCouchSource">
                 <%  var sourceCouchOptions = ['Options', 'http://openbell.ole.org:5984', 'http://olesomalia:oleoleole@olesomalia.cloudant.com', 'http://127.0.0.1:5984']
                 for(var i = 0; i < sourceCouchOptions.length; i++) { %>
                 <option value="<%= sourceCouchOptions[i]%>"><%= sourceCouchOptions[i]%></option>
                 <% } %>
                 </select>
-
             </div>
-
         </div>
-
          <div class="row">
-
              <div class="large-5 large-offset-5 columns" style="padding-top: 3%;">
-
                  <input  class="button" style="float:right;" type="button" id="submitSourceCouchAddr" name="submitSourceCouchAddr" onclick="viewDataFromSelBeLL(); check();" value="View">
-
             </div>
-
         </div>
-
          <div id="popup-spinning" name="popup-spinning"></div>
-
     </div>
-
     <div class="row panel" id="hiddenResourcesTable" style="display:none;">
-
         <div class="row">
-
             <div class="large-12 columns">
-
                  <table id="selectionPanelsTable">
-
                     <tr>
                         <td>
                             <div id="coursesPanel" name="coursesPanel">
                                 <h3 id="selectCoursesHead"></h3>
-
                                 <div class="row">
                                     <div class="large-8 columns">
-
                                         <div id="divSearchCourse"></div>
-
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="large-8 columns">
-
                                         <div id="div-searched-courses"></div>
-
                                     </div>
                                 </div>
-
                                 <div id="divSelectAllCourses"></div>
                                 <div id="selectCourses" name="selectCourses" style="overflow-y: auto; overflow-x: auto; height: 250px;"></div>
                             </div>
@@ -113,21 +80,25 @@
                         <td>
                             <div id="resourcesPanel" name="resourcesPanel">
                                 <h3 id="selectResourcesHead"></h3>
+                                <div class="row">
+                                    <div class="large-8 columns">
+                                        <div id="divSearchResource"></div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="large-8 columns">
+                                        <div id="div-searched-resources"></div>
+                                    </div>
+                                </div>
                                 <div id="divSelectAllResources"></div>
                                 <div id="selectResources" name="selectResources" style="overflow-y: auto; overflow-x: auto; height: 250px;"></div>
-
                                 <div class="pagination-centered" style="padding: 15px 60px;">
                                     <div id="paginator"></div>
                                 </div>
-                            
                             </div>
                         </td>
                     </tr>
-
-
                     <br><br>
-                    
-
                     <!--add another row in table which will prvide collection selection interface-->
                     <tr>
                         <td>
@@ -151,17 +122,11 @@
                             <div id="submitPanel" name="submitPanel"></div>
                         </td>
                     </tr>
-        </table>
-    </div>
+                </table>
+            </div>
         </div>
-
-
     </div>
-	
 	<!--<div id="dataSelectionPanel" name="dataSelectionPanel">-->
-   
-
-    
 	<!--<input type="button" id="hmm" name="hmm" onclick="testing()" value="Delete and Copy Db files to dest folder">-->
 	<div id="socketRespFromServer"></div>
     <!--</div>-->

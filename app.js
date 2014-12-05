@@ -68,6 +68,25 @@ io.sockets.on('connection', function (socketInst) {
 		});
 	});
 
+
+    socketInst.on('socketSearchResourceRequest', function (sockRequestData) {
+        waterfall([
+            function(callback){
+                dao.fetchResourceDocByName(sockRequestData.searchString, callback);
+            }
+        ], function (err, result) {
+            if (err) {
+                console.log("app.js:: socketInst.on('socketSearchResourceRequest'):: final callback error");
+                console.log(err);
+            } else {
+                // result contains resource doc info for the searched name
+//                console.log(result);
+                var sockResponseData = {arrMatchingResources: result}; // result might have 0 records in it
+                socketInst.emit('socketSearchResourceResponse', sockResponseData);
+            }
+        });
+    });
+
     socketInst.on('socketSearchCourseRequest', function (sockRequestData) {
         waterfall([
             function(callback){

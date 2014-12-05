@@ -331,7 +331,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
 
   functions.fetchCourseDocWithName = function(courseTitle, callback) {
     var coursesDb = sourceCouchDb.db.use('groups');
-    coursesDb.view('bell', 'sortedByTitle', {include_docs: true, key: courseTitle}, function(err, allDocsInfo) {
+    coursesDb.view('bell', 'searchCoursesBySubsetOfTitleWords', {include_docs: true, key: courseTitle}, function(err, allDocsInfo) {
         if (err) {
             console.log("dbInteractions.js:: error executing view 'courseSearch' of db: " + 'groups'); console.log(err);
             callback(err);
@@ -385,6 +385,29 @@ module.exports = function (localCouchServer, sourceCouchServer) {
         callback(null, response.value);       
       }
     });
+  };
+
+  functions.fetchResourceDocByName = function (resourceTitle, callback) {
+      var resourcesDb = sourceCouchDb.db.use('resources');
+      resourcesDb.view('bell', 'searchResourcesBySubsetOfTitleWords',{include_docs: true, key: resourceTitle}, function(err, allDocsInfo) {
+          if (err) {
+              console.log("error fetching docs of db: " + 'resources'); console.log(err);
+              callback(err);
+          } else {
+              var arrResources = [];
+              var resourceIdAndTitle;
+              allDocsInfo.rows.forEach( function(resourceDocContainer) {
+                  // console.log(courseDocContainer);
+                  // console.log(courseDocContainer.key + "\t" + courseDocContainer.value + "\t" + courseDocContainer.doc.CourseTitle);
+                  if (resourceDocContainer.doc.hasOwnProperty('views') === false) { // if the fetched doc is not a design doc
+                      resourceIdAndTitle = {id: resourceDocContainer.doc._id, name: resourceDocContainer.doc.title};
+                      arrResources.push(resourceIdAndTitle);
+                  }
+              });
+              console.log("fetched courses with name(=" + resourceTitle + "): " + arrResources.length + " docs");
+              callback(null, arrResources);
+          }
+      });
   };
 
   functions.fetchResourceDocsWithoutAttachmentsForSelectedPage = function(pageNumber, callback) {
