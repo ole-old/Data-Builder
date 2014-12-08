@@ -50,9 +50,7 @@ socket.on('statusOnStarterDataPrep', function(statusMsg) {
 		alert("Failed to prepare data out of chosen items.\n Error: " + statusMsg.err.error + "\n Plz try again");
 	} else {
 		// enable button and show status of starter-data-prep task
-		alert("Successfully prepared data out of chosen items. \nPlease pick all contents inside the folder 'StarterDataLocation' of " + 
-			"the Startup-Data-Builder and \nplace (choosing overwrite option if prompted) them inside the " + 
-			"folder 'Starter_Data' of the Startup-Installation tool");
+		alert("Installer inside the Data Builder is Successfully Prepared out of Chosen Items!");
 	}
 	var activityIndicatorPanelJqueryId = "#submitPanel";//"#selectionPanelsTable";//"#popup-spinning";
 	stopActivityIndicator(activityIndicatorPanelJqueryId);
