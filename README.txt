@@ -14,15 +14,8 @@ d)	You can select  those courses and resources that you wish to include (as star
     component resources displayed in the panel titled "Contents Of Chosen Collection" or "Contents Of Collection: xyz".
     Select resources from any and as many collections as you wish to. Finally, when you are done selecting your data
     set, click the button at the bottom, labeled "Prepare Starter Data", of the page.
-e)	The service will prepare data and place it in a specific folder, labeled 'StarterDataLocation', inside the main
-    directory of this (Data-Builder) tool. All contents from 'StarterDataLocation' folder are to be copied by the user
-    to the folder named 'Starter_Data' inside the Startup-Installation tool. This information will appear on the
-    screen as a prompt if the process completes successfully. However, if the process encounters any errors, you will
-    still receive a prompt but this one carrying an error message instead.
-f)  Carry out the copying task described in the previous step after clicking ok the prompt.
+5.	The service will prepare data and place it inside the Bell-Installer directory in Data-Builder. Installer is now ready to install App with chosen data!
 
 Notes for QA
 ------------
-When the BeLL installer, also called Startup-Installation tool, derived after having copied files into it in step (f)
-above, is run on any windows machine, the resulting BeLL app should have the courses and resources that were chosen
-through this Data-Builder tool.
+Using the BeLL installer created as above, the resulting installed BeLL app should have the courses and resources that were chosen through this Data-Builder tool.
