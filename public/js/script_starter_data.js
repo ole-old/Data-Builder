@@ -386,6 +386,7 @@ socket.on('dataFromChosenBeLLCouch', function(data) {
 		// append courses to courses panel/div #selectCourses
         $("#divSearchCourse").html('<div class="col-xs-3" ><div class="right-inner-addon"><i class="icon-search"></i><input name="course-search-box" type="search" class="form-control" placeholder="Search Course" /></div></div>');
         $("#divSearchResource").html('<div class="col-xs-3" ><div class="right-inner-addon"><i class="icon-search"></i><input name="resource-search-box" type="search" class="form-control" placeholder="Search Resource" /></div></div>');
+        $("#divSearchCollection").html('<div class="col-xs-3" ><div class="right-inner-addon"><i class="icon-search"></i><input name="collection-search-box" type="search" class="form-control" placeholder="Search Collection" /></div></div>');
 
         populateSelectCoursesViewPanel(data.arrCourses);
 	 	// append resources to resources panel/div #selectCourses
@@ -510,6 +511,24 @@ $("#divSearchResource").keyup(function(e){
         if (searchString) {
             var data = {searchString: searchString}
             socket.emit('socketSearchResourceRequest', data);
+        }
+    }
+});
+
+$("#divSearchCollection").keyup(function(e){
+    if(e.keyCode == 13){
+        var searchString = $("#divSearchCollection .form-control").val();
+//        alert("search string: " + searchString);
+        if (searchString) {
+            // there exists a listitem with id/value/label having a substring === searchString, then scroll to that
+            var matchingListItem = $("li:contains("+ searchString + ")");
+            if (matchingListItem && matchingListItem.length) {
+                $('#selectCollections').animate({
+                    scrollTop: matchingListItem.offset().top - $('#selectCollections').offset().top + $('#selectCollections').scrollTop()
+                }, 1000);
+            } else {
+                alert("No match found for the search string: " + searchString);
+            }
         }
     }
 });
