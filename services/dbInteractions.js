@@ -7,7 +7,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
   var rimraf = require('rimraf');
 
   var sourceFolder =  "C:\\Program Files (x86)\\Apache Software Foundation\\CouchDB\\var\\lib\\couchdb\\";
-  var destFolder = "StarterDataLocation";
+  var destFolder = "Bell-Installer-for-Windows\\Starter_Data";
 
   var starterDataDbs = ['startercollectionlist', 'starterresources', 'startergroups', 'startercoursestep'];
   var existingDbs = ['collectionlist', 'resources', 'groups', 'coursestep'];
