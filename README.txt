@@ -4,6 +4,8 @@ With this app, starter data for a BeLL installer can be built. For a step by ste
 Prereqs
 -------
 Node.js must be installed on the system before running Data-Builder
+To download the Data Builder completely, use the following git command: 
+    git clone --recursive -b <branchname(options: dev, master)> https://github.com/open-learning-exchange/Data-Builder.git
 
 
 How to use Installer/Starter Data Builder App
