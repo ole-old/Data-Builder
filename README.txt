@@ -1,5 +1,8 @@
 With this app, starter data for a BeLL installer can be built. For a step by step user guide, read on.
 ------------------------------------------------------------------------------------------------------
+Prereqs
+-------
+Node.js must be installed on the system before running Data-Builder
 
 How to use Installer/Starter Data Builder App
 ---------------------------------------------
@@ -18,4 +21,5 @@ d)	You can select  those courses and resources that you wish to include (as star
 
 Notes for QA
 ------------
-Using the BeLL installer created as above, the resulting installed BeLL app should have the courses and resources that were chosen through this Data-Builder tool.
+After completing an iteration of data-builder operation, any subsequent installs of BeLL app using the 
+'Bell-Installer-for-Windows' tool inside it should have the chosen courses and resources in them (the installed apps).
