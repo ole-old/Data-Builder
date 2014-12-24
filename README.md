@@ -1,3 +1,6 @@
+## Prerequisites
+Node.js must be installed on the system before running Data-Builder
+
 ## How to use Builder Data for BELL Installer
 1.  Open/run the file "launch-app.bat". It will start the app server and open the following page in firefox browser: **http://localhost:3000/prepare-starter-data**
 2.  Choose/specify a BeLL server by selecting one of the options from the **Options** dropdown or by typing in the address of the server yourself. Then click the button named **View**
@@ -6,4 +9,5 @@
 5.	The service will prepare data and place it inside the Bell-Installer directory in Data-Builder. Installer is now ready to install App with chosen data!
 
 ## Notes for QA
-Using the BeLL installer created as above, the resulting installed BeLL app should have the courses and resources that were chosen through this Data-Builder tool.
+After completing an iteration of data building operation, any subsequent installs of BeLL app using the 
+'Bell-Installer-for-Windows' tool inside the data-builder should have the chosen courses and resources in them (the installed apps).
