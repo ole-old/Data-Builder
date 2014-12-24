@@ -20,7 +20,7 @@ d)	You can select  those courses and resources that you wish to include (as star
     Select resources from any and as many collections as you wish to. Finally, when you are done selecting your data
     set, click the button at the bottom, labeled "Prepare Starter Data", of the page. A spinner will appear on the
     "Prepare Starter Data" button and will stay there, spinning, until the selected resources and courses have been
-    fetched from the specified couchdb server. 
+    fetched from the specified couchdb server and turned into starter data.
 5.	Finally, a dialog will appear telling you whether the data preparation went through with success or failed. The 
     success message on dialog implies the service has prepared the data and has also placed packaged it into the 
     'Bell-Installer-for-Windows', the startup installation tool present inside the Data-Builder. The startup installation
