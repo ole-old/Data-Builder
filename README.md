@@ -9,5 +9,4 @@ Node.js must be installed on the system before running Data-Builder
 5.	The service will prepare data and place it inside the Bell-Installer directory in Data-Builder. Installer is now ready to install App with chosen data!
 
 ## Notes for QA
-After completing an iteration of data building operation, any subsequent installs of BeLL app using the 
-'Bell-Installer-for-Windows' tool inside the data-builder should have the chosen courses and resources in them (the installed apps).
+After completing data building operation, any subsequent installs of BeLL app using the 'Bell-Installer-for-Windows' tool inside the data-builder should have the chosen courses and resources in them (the installed apps).
