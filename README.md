@@ -1,5 +1,7 @@
 ## Prerequisites
 Node.js must be installed on the system before running Data-Builder
+To download the Data Builder completely, use the following git command: 
+    git clone --recursive -b <branchname(options: dev, master)> https://github.com/open-learning-exchange/Data-Builder.git
 
 ## How to use Builder Data for BELL Installer
 1.  Open/run the file "launch-app.bat". It will start the app server and open the following page in firefox browser: **http://localhost:3000/prepare-starter-data**
