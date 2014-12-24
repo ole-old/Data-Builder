@@ -1,8 +1,10 @@
 With this app, starter data for a BeLL installer can be built. For a step by step user guide, read on.
 ------------------------------------------------------------------------------------------------------
+
 Prereqs
 -------
 Node.js must be installed on the system before running Data-Builder
+
 
 How to use Installer/Starter Data Builder App
 ---------------------------------------------
@@ -16,10 +18,16 @@ d)	You can select  those courses and resources that you wish to include (as star
     checking their respective checkboxes. Click on a collection name from the "All Collections" panel to see its
     component resources displayed in the panel titled "Contents Of Chosen Collection" or "Contents Of Collection: xyz".
     Select resources from any and as many collections as you wish to. Finally, when you are done selecting your data
-    set, click the button at the bottom, labeled "Prepare Starter Data", of the page.
-5.	The service will prepare data and place it inside the Bell-Installer directory in Data-Builder. Installer is now ready to install App with chosen data!
+    set, click the button at the bottom, labeled "Prepare Starter Data", of the page. A spinner will appear on the
+    "Prepare Starter Data" button and will stay there, spinning, until the selected resources and courses have been
+    fetched from the specified couchdb server. 
+5.	Finally, a dialog will appear telling you whether the data preparation went through with success or failed. The 
+    success message on dialog implies the service has prepared the data and has also placed packaged it into the 
+    'Bell-Installer-for-Windows', the startup installation tool present inside the Data-Builder. The startup installation
+    can now be used for doing a BeLL windows install with starter data.
+
 
 Notes for QA
 ------------
-After completing an iteration of data-builder operation, any subsequent installs of BeLL app using the 
-'Bell-Installer-for-Windows' tool inside it should have the chosen courses and resources in them (the installed apps).
+After completing data building operation, any subsequent installs of BeLL app using the 'Bell-Installer-for-Windows' tool 
+inside the data-builder should have the chosen courses and resources in them (the installed apps).
