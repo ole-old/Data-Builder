@@ -1,5 +1,6 @@
 ## Prerequisites
-Node.js must be installed on the system before running Data-Builder
+Node.js and CouchDB must be installed on the system before running Data-Builder
+
 To download the Data Builder completely, use the following git command: 
     git clone --recursive -b branchname(options: dev, master) https://github.com/open-learning-exchange/Data-Builder.git
 
