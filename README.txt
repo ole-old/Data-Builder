@@ -10,13 +10,13 @@ To download the Data Builder completely, use the following git command:
 
 How to use Installer/Starter Data Builder App
 ---------------------------------------------
-a)	Open/run the file "launch-app.bat". It will start the app server and open the following page in firefox browser:
+1)	Open/run the file "launch-app.bat". It will start the app server and open the following page in firefox browser:
     http://localhost:3000/prepare-starter-data
-b)	Choose/specify a BeLL server by selecting one of the options from the "Options" dropdown or by typing in the
+2)	Choose/specify a BeLL server by selecting one of the options from the "Options" dropdown or by typing in the
     address of the server yourself. Then click the button named "View".
-c)	After a short wait, symbolised by a spinner below the options dropdown, the page will be populated with courses,
+3)	After a short wait, symbolised by a spinner below the options dropdown, the page will be populated with courses,
     resources, and collections data from the identified BeLL server.
-d)	You can select  those courses and resources that you wish to include (as starter data) in the BeLL installer by
+4)	You can select  those courses and resources that you wish to include (as starter data) in the BeLL installer by
     checking their respective checkboxes. Click on a collection name from the "All Collections" panel to see its
     component resources displayed in the panel titled "Contents Of Chosen Collection" or "Contents Of Collection: xyz".
     Select resources from any and as many collections as you wish to. Finally, when you are done selecting your data
@@ -27,6 +27,11 @@ d)	You can select  those courses and resources that you wish to include (as star
     success message on dialog implies the service has prepared the data and has also placed packaged it into the 
     'Bell-Installer-for-Windows', the startup installation tool present inside the Data-Builder. The startup installation
     can now be used for doing a BeLL windows install with starter data.
+6.  To go on to do a BeLL installation after a success message in step 5 above, copy the 'Bell-Installer-for-Windows' 
+    directory inside the Data Builder root folder and transfer it to any target windows machine. After the transfer, open 
+    the Bell-Installer-for-Windows folder at the target machine and run the file named 'install.bat' (BeLL installation 
+    guide can be be found in the readme for the following repo: 
+    https://github.com/open-learning-exchange/Bell-Installer-for-Windows).
 
 
 Notes for QA
