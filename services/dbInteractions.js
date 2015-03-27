@@ -7,7 +7,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
   var rimraf = require('rimraf');
 
   var sourceFolder =  "C:\\Program Files (x86)\\Apache Software Foundation\\CouchDB\\var\\lib\\couchdb\\";
-  var destFolder = "Bell-Installer-for-Windows\\Starter_Data";
+  var destFolder = "StarterData";
 
   var starterDataDbs = ['startercollectionlist', 'starterresources', 'startergroups', 'startercoursestep'];
   var existingDbs = ['collectionlist', 'resources', 'groups', 'coursestep'];
@@ -20,23 +20,6 @@ module.exports = function (localCouchServer, sourceCouchServer) {
   };
 
   functions.deleteDbs = function(callback) {
-    // console.log(starterDataDbs);
-    // for (var i = starterDataDbs.length - 1; i >= 0; i--) {
-    //   couchDb.db.destroy(starterDataDbs[i], function(err, resp) {
-    //     if (err) {
-    //       if (err.error === "not_found"){
-    //         callback();
-    //       } else {
-    //         callback(err);
-    //       }
-    //     } else {
-    //       console.log('deleted ' + starterDataDbs[i]);
-    //       if (i === 0) {
-    //         callback();
-    //       }
-    //     }
-    //   });
-    // };
     couchDb.db.destroy('startercollectionlist', function(err, resp) {
       if ( (err) && (err.error !== 'not_found') ) {
         callback(err);
@@ -107,11 +90,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
     var resourceIds = selectedCoursesAndResources.resourceIds;
     couchDb.db.replicate(resourcesDb, starterResourcesDb, { doc_ids: resourceIds }, function(err, body) {
         if (!err){
-          // console.log("replicated successfully");
-          // console.log(body);  console.log("<----------------------------->");
-          // prepare tags data for resources
-          console.log("resources added to installer data for following resIds: \n" + resourceIds);
-//          functions.prepareTagsDataForResource(callback);
+          console.log("resources added to installer data for following resIds: \n" + resourceIds);;
           callback();
         } else {
           callback(err);
@@ -122,8 +101,6 @@ module.exports = function (localCouchServer, sourceCouchServer) {
   functions.prepareCollectionsDataForInstaller = function(collectionIds, callback) {
     var tagsDb = sourceCouchDb.db.use('collectionlist');
     var starterTagsDb = couchDb.db.use('startercollectionlist');
-    // var referencedTagDocKeys = courseStepDoc.Tag;
-    // console.log(referencedTagDocKeys);
     couchDb.db.replicate(tagsDb, starterTagsDb, { doc_ids: collectionIds }, function(err, body) {
       if (!err) {
           console.log("collections added to installer data for following collectionlistIds: \n" + collectionIds);
@@ -139,14 +116,12 @@ module.exports = function (localCouchServer, sourceCouchServer) {
   functions.prepareTagsDataForResource = function(callback) {
     var tagsDb = sourceCouchDb.db.use('collectionlist');
     var starterTagsDb = couchDb.db.use('startercollectionlist');
-    // var referencedTagDocKeys = courseStepDoc.Tag;
-    // console.log(referencedTagDocKeys);
     couchDb.db.replicate(tagsDb, starterTagsDb, { }, function(err, body) {      
         if (!err) {
           callback();
         } else {
           console.log("dbInteractions.js:: prepareTagsDataForResource:: error in replicating db " + 'collectionlist');
-          console.log(err);  //console.log("<----------------------------->");
+          console.log(err);
           callback(err);
         }
       });
@@ -159,11 +134,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
     var referencedResourceKeys = courseStepDoc.resourceId;
     couchDb.db.replicate(resourcesDb, starterResourcesDb, { doc_ids: referencedResourceKeys }, function(err, body) {
         if (!err){
-          // console.log("replicated successfully");
-          // console.log(body);  console.log("<----------------------------->");
-          // prepare tags data for resources
           console.log("resources for the course-step '" + courseStepDoc.title + "' added to installer data");
-//          functions.prepareTagsDataForResource(callback);
           callback();
         } else {
           callback(err);
@@ -179,15 +150,12 @@ module.exports = function (localCouchServer, sourceCouchServer) {
       if (err) {         
         dadyCallback(err);
       } else {
-        // console.log("reached courseSteps tak...");
         async.eachSeries(respBody.rows, function (courseStepDocContainer, sonCallback) {
           // prepare resources data for each course step
           var courseStepDoc = courseStepDocContainer.doc;
           courseStepTitle = courseStepDoc.title;
           courseStepIdsForTheCourse.push(courseStepDoc._id);
-          // console.log("course step id: " + courseStepDocContainer.doc._id);
           functions.prepareResourcesDataForCourseStep(courseStepDoc, sonCallback);
-          // console.log("course step title: " + courseStepDocContainer.doc.title);
         }, function (err, result) {
           if (err) {
             dadyCallback(err);
@@ -199,7 +167,7 @@ module.exports = function (localCouchServer, sourceCouchServer) {
                 dadyCallback();
               } else {
                 console.log("dbInteractions.js:: prepareCourseStepsDataForCourse:: error in replicating db " + 'coursestep');
-                console.log(err);  //console.log("<----------------------------->");
+                console.log(err);
                 dadyCallback(err);
               }
             });
@@ -215,12 +183,9 @@ module.exports = function (localCouchServer, sourceCouchServer) {
     starterCoursesDb.insert(courseDoc, courseDoc._id, function(err, body) {
       if (err){
         console.log("dbInteractions.js:: prepareDataForCourses:: error in inserting doc in db " + 'startergroups');
-        console.log(err);  console.log("<----------------------------->");
+        console.log(err);
         callback(err);
       } else {
-        // console.log("------------body-------------");
-        // console.log(body); console.log("<----------------------------->");
-        // callback();
         setTimeout(function () {
           callback();
         }, 5000);
@@ -249,8 +214,6 @@ module.exports = function (localCouchServer, sourceCouchServer) {
               courseDoc.courseLeader = ""; courseDoc.memberLimit = ""; courseDoc.startDate = "";
               courseDoc.endDate = ""; courseDoc.startTime = ""; courseDoc.endTime = ""; courseDoc.location = "";
               delete courseDoc._rev;
-              // console.log("courseId: " + courseDoc._id);
-              // console.log(courseDoc);
               // now save it in startergroups db which is for the installer
               functions.insertCourseDocInStarterCoursesDb(courseDoc, grandSonCallback);
             }
@@ -282,8 +245,6 @@ module.exports = function (localCouchServer, sourceCouchServer) {
         // done. it tried fs.rename first, and then falls back to piping the source file to the dest file and 
         // then unlinking the source file.
         if (err) {
-          // console.log("dbInteractions.js:: moveStarterDataFilesToDesiredLocation:: error in moving db files");
-          // console.log(err);  console.log("<----------------------------->");
           callback(err);
         } else {
           i++;
@@ -315,15 +276,12 @@ module.exports = function (localCouchServer, sourceCouchServer) {
       function(callback) {
         // iterate over courseIds of selected courses and prepare data for each course
         var courseIds = selectedCoursesAndResources.courseIds;
-        // console.log(courseIds);
         functions.prepareDataForCourses(courseIds, callback);        
       }
     ], function (err, result) {
       if (err) {
         dadyCallback(err);
       } else {
-        // move all db files holding starter/installer data to an appropriate location
-        // functions.moveStarterDataFilesToDesiredLocation(dadyCallback);
         dadyCallback();
       }
     });    
@@ -360,8 +318,6 @@ module.exports = function (localCouchServer, sourceCouchServer) {
         var arrCourses = []; 
         var courseIdAndTitle;
         allDocsInfo.rows.forEach( function(courseDocContainer) {
-          // console.log(courseDocContainer);
-          // console.log(courseDocContainer.key + "\t" + courseDocContainer.value + "\t" + courseDocContainer.doc.CourseTitle);       
           if (courseDocContainer.doc.hasOwnProperty('views') === false) { // if the fetched doc is not a design doc
             courseIdAndTitle = {id: courseDocContainer.doc._id, name: courseDocContainer.doc.CourseTitle};
             arrCourses.push(courseIdAndTitle);
@@ -397,8 +353,6 @@ module.exports = function (localCouchServer, sourceCouchServer) {
               var arrResources = [];
               var resourceIdAndTitle;
               allDocsInfo.rows.forEach( function(resourceDocContainer) {
-                  // console.log(courseDocContainer);
-                  // console.log(courseDocContainer.key + "\t" + courseDocContainer.value + "\t" + courseDocContainer.doc.CourseTitle);
                   if (resourceDocContainer.doc.hasOwnProperty('views') === false) { // if the fetched doc is not a design doc
                       resourceIdAndTitle = {id: resourceDocContainer.doc._id, name: resourceDocContainer.doc.title};
                       arrResources.push(resourceIdAndTitle);
@@ -422,8 +376,6 @@ module.exports = function (localCouchServer, sourceCouchServer) {
         var arrResources = [];
         var resourceIdAndTitle;
         allDocsInfo.rows.forEach( function(resourceDocContainer) {
-          // console.log(courseDocContainer);
-          // console.log(courseDocContainer.key + "\t" + courseDocContainer.value + "\t" + courseDocContainer.doc.CourseTitle);
           if (resourceDocContainer.doc.hasOwnProperty('views') === false) { // if the fetched doc is not a design doc
             resourceIdAndTitle = {id: resourceDocContainer.doc._id, name: resourceDocContainer.doc.title};
             arrResources.push(resourceIdAndTitle);
