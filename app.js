@@ -173,31 +173,6 @@ io.sockets.on('connection', function (socketInst) {
             function(result, callback) {
                 dataFromBeLL.preSelectedResources = []; // so that it can never be null
                 dataFromBeLL.resourcesCount = result;
-                var collectionName = "*BeLL User Guide*";
-                var collectionId; // its value is 'undefined' after declaration
-                if (dataFromBeLL.arrMajorCollections !== null && dataFromBeLL.arrMajorCollections.length > 0) {
-                    var size = dataFromBeLL.arrMajorCollections.length;
-                    for (var i = 0; i < size; i++) {
-                        if (dataFromBeLL.arrMajorCollections[i].name === collectionName) {
-                            // pick the index and fetch ids of all resources in this collection
-                            collectionId = dataFromBeLL.arrMajorCollections[i].id;
-                            dataFromBeLL.preSelectedCollection = {id: collectionId, name: collectionName};
-                            break;
-                        }
-                    }
-                    if (collectionId) { // if its not undefined, fetch the constituent resources of collection
-                        dao.fetchResourcesPointingToThisCollection(collectionId, collectionName, callback);
-                    } else {
-                        console.log("source system has no collection with name: " + collectionName);
-                        callback();
-                    }
-                } else {
-                    console.log("source system has no collections in it");
-                    callback();
-                }
-            },
-            function(result, callback) {
-                dataFromBeLL.preSelectedResources = result;
                 dataFromBeLL.preSelectedResourcesCount = result.length;
                 // get the welcome video resource now and add that to preSelectedResources
                 dao.fetchWelcomeVideoResource(callback);
