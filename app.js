@@ -37,11 +37,6 @@ app.get('/prepare-starter-data', function(req, res) {
 	res.render('starter_data', {jsonForSelectingDataFromUI: jsonForSelectingDataFromUI});	
 });
 
-// app.get('/replication-erase', function(req, res){
-// 	var replicator = require('./replicator')(couchSource, couchTarget, databases);
-// 	replicator.deleteDatabases(res);
-// });
-
 var server = app.listen(3000, function() {
     console.log('Listening on port %d', server.address().port);
 });
@@ -79,8 +74,6 @@ io.sockets.on('connection', function (socketInst) {
                 console.log("app.js:: socketInst.on('socketSearchResourceRequest'):: final callback error");
                 console.log(err);
             } else {
-                // result contains resource doc info for the searched name
-//                console.log(result);
                 var sockResponseData = {arrMatchingResources: result}; // result might have 0 records in it
                 socketInst.emit('socketSearchResourceResponse', sockResponseData);
             }
@@ -97,8 +90,6 @@ io.sockets.on('connection', function (socketInst) {
                 console.log("app.js:: socketInst.on('socketSearchCourseRequest'):: final callback error");
                 console.log(err);
             } else {
-                // result contains course doc info for the searched name
-//                console.log(result);
                 var sockResponseData = {arrMatchingCourses: result}; // result might have 0 records in it
                 socketInst.emit('socketSearchCourseResponse', sockResponseData);
             }
@@ -108,7 +99,7 @@ io.sockets.on('connection', function (socketInst) {
 	socketInst.on('fetchResourcesForThisCollection', function(collectionId, collectionName) {
 		waterfall([
 			function(callback){
-				dao.fetchResourcesPointingToThisCollection(collectionId, collectionName, callback);
+				dao.fetchResourcesPointingToThisCollectionAndItsSubCollections(collectionId, collectionName, callback);
 			}
 		], function (err, result) {
 			var dataForChosenCollection = {err: null, data: null, collectionName: collectionName};

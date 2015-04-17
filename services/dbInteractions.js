@@ -463,6 +463,65 @@ module.exports = function (localCouchServer, sourceCouchServer) {
     });
   };
 
+    functions.fetchResourcesPointingToThisCollectionAndItsSubCollections = function(collectionId, collectionName, callback) {
+        var subCollectionsDb = sourceCouchDb.db.use('collectionlist');
+        var resourcesDb = sourceCouchDb.db.use('resources');
+        var subCollectionsViewkeys = [collectionId];
+        var resourcesViewkeys = [collectionId];
+        var arrResources = [];
+        var arrSubCollection = [];
+
+
+        // Check if major-collection have any resources
+        resourcesDb.view('bell', 'listCollection',{keys: resourcesViewkeys, include_docs: true}, function(err, resp) {
+            if (err) {
+                console.log("dbInteractions.js:: fetchResourcesPointingToThisCollectionAndItsSubCollections:: error fetching docs of db: " + 'resources'); console.log(err);
+                callback(err);
+            } else {
+                var resourceIdAndTitle;
+                console.log("fetched resources count for collection: " + collectionName + " (" + collectionId + "): " + resp.rows.length);
+                resp.rows.forEach( function(resourceDocContainer) {
+                    resourceIdAndTitle = {id: resourceDocContainer.doc._id, name: resourceDocContainer.doc.title};
+                    console.log("resourceId: " + resourceIdAndTitle.id);
+                    arrResources.push(resourceIdAndTitle);
+                });
+            }
+        });
+
+        // Include all resources from all sub-collections
+        subCollectionsDb.view('bell', 'subCategoriesByMajorCategory',{keys: subCollectionsViewkeys, include_docs: true}, function(err, resp) {
+            if (err) {
+                console.log("dbInteractions.js:: fetchResourcesPointingToThisCollectionAndItsSubCollections:: error fetching docs of db: " + 'collectionlist'); console.log(err);
+                callback(err);
+            } else {
+                console.log("fetched sub-collections count for collection: " + collectionName + " (" + collectionId + "): " + resp.rows.length);
+                if(resp.rows.length == 0)
+                    callback(null, arrResources);
+                resp.rows.forEach( function(subCollectionDocContainer) {
+                    arrSubCollection.push(subCollectionDocContainer.doc._id)
+                    resourcesViewkeys = [subCollectionDocContainer.doc._id]
+                    // To-Do: First push all subcollections in arrSubCollection and then iterate on each to get resources from them
+                    resourcesDb.view('bell', 'listCollection',{keys: resourcesViewkeys, include_docs: true}, function(err, resp){
+                        if (err) {
+                            console.log("dbInteractions.js:: fetchResourcesPointingToThisCollectionAndItsSubCollections:: error fetching docs of db: " + 'resources'); console.log(err);
+                            callback(err);
+                        } else {
+                            var resourceIdAndTitle;
+                            console.log("fetched resources count for collection: " + subCollectionDocContainer.doc.CollectionName + " (" + subCollectionDocContainer.doc._id + "): " + resp.rows.length);
+                            resp.rows.forEach( function(resourceDocContainer) {
+                                resourceIdAndTitle = {id: resourceDocContainer.doc._id, name: resourceDocContainer.doc.title};
+                                console.log("resourceId: " + resourceIdAndTitle.id);
+                                arrResources.push(resourceIdAndTitle);
+                            });
+                            callback(null, arrResources);
+                        }
+                    });
+                });
+
+            }
+        });
+    };
+
   // this method has not been used yet. it was just copied from another file to check if things were working  or not in the beginning
   functions.writeToFile = function(fileNamePostfix, data, successMsg, callback) {
     var filename = "./" + "design_docs" + "/" + "design_doc_" + fileNamePostfix + ".txt";
